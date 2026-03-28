@@ -165,15 +165,22 @@ if ($is_admin && isset($_GET['user_id'])) {
         .page-btn[disabled] { opacity: 0.5; cursor: not-allowed; }
         .page-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
 
-        /* Sidebar Toggle Mobile & Desktop */
-        .menu-toggle { display: block; border: none; background: white; width: 40px; height: 40px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); color: var(--primary); font-size: 1.2rem; cursor: pointer; transition: all 0.2s; margin-right: 15px; }
+        /* Sidebar Toggle - Hidden on Desktop by Default */
+        .menu-toggle { display: none; border: none; background: white; width: 40px; height: 40px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); color: var(--primary); font-size: 1.2rem; cursor: pointer; transition: all 0.2s; margin-right: 15px; }
         .menu-toggle:hover { background: #f8fafc; transform: scale(1.05); }
-        .sidebar.collapsed + .main-container .menu-toggle { display: block; }
+        
+        .btn-close-sidebar { display: none; background: none; border: none; color: #94a3b8; font-size: 1.2rem; cursor: pointer; align-items: center; justify-content: center; }
+        .btn-close-sidebar:hover { color: var(--primary); }
         
         @media (max-width: 768px) {
             .sidebar { position: fixed; left: -100%; height: 100%; z-index: 20; background: white; }
             .sidebar.open { left: 0; box-shadow: 10px 0 30px rgba(0,0,0,0.1); }
-            .menu-toggle { display: block; background: none; color: var(--primary); font-size: 1.5rem; }
+            .menu-toggle { display: block; }
+            .btn-close-sidebar { display: flex; }
+            
+            /* Ensure sidebar takes space correctly when open on mobile */
+            .sidebar { width: 280px; }
+            .sidebar.collapsed { width: 0; }
         }
     </style>
 </head>
