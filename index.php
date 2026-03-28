@@ -227,6 +227,7 @@ if ($is_admin && isset($_GET['user_id'])) {
     </div>
 
     <script>
+        const userRole = <?= json_encode($_SESSION['user_role']) ?>;
         const targetUserId = <?= json_encode($target_user_id) ?>;
         let data = [];
         let archive = {};
@@ -409,11 +410,14 @@ if ($is_admin && isset($_GET['user_id'])) {
                 return `
                 <div class="card ${isDone ? 'completed' : ''}" id="card-${item.id}">
                     <div class="card-header">
-                        <div style="display: flex; align-items: center;">
+                        <div style="display: flex; align-items: center; width: 100%;">
                             <span style="color: var(--primary);">No. ${displayNo}</span>
                             ${vocabHtml}
+                            ${userRole === 'admin' && item.creator_name ? `<span style="margin-left:auto; font-size: 0.7rem; color: #94a3b8; background: #f8fafc; border: 1px solid #e2e8f0; padding: 2px 8px; border-radius: 4px;">By: ${item.creator_name}</span>` : ''}
                         </div>
-                        ${isDone ? '<span style="color:var(--secondary); font-size: 0.8rem;">✔ Lancar</span>' : ''}
+                    </div>
+                    <div style="padding: 0 15px;">
+                        ${isDone ? '<span style="color:var(--secondary); font-size: 0.8rem; display: block; margin-top: 5px;">✔ Lancar</span>' : ''}
                     </div>
                     
                     <div class="card-content">

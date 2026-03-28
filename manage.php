@@ -95,7 +95,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['type']) && $_POST['ty
 
 // Fetch filtered entries
 list($auth_where, $auth_params) = get_auth_query($is_admin_shared_mode, $manage_user_id);
-$stmt = $pdo->prepare("SELECT * FROM talk_entries WHERE $auth_where ORDER BY id ASC");
+$stmt = $pdo->prepare("SELECT talk_entries.*, users.fullname as creator_name FROM talk_entries LEFT JOIN users ON talk_entries.user_id = users.id WHERE $auth_where ORDER BY id ASC");
 $stmt->execute($auth_params);
 $entries = $stmt->fetchAll();
 $vocabs = $pdo->query("SELECT * FROM vocabulary ORDER BY id ASC")->fetchAll();
@@ -211,6 +211,9 @@ if (isset($_GET['edit_vocab'])) {
                     <tr>
                         <th>No</th>
                         <th>ID / EN</th>
+                        <?php if ($_SESSION['user_role'] === 'admin'): ?>
+                            <th>Creator</th>
+                        <?php endif; ?>
                         <th>Actions</th>
                     </tr>
                 </thead>
@@ -222,6 +225,9 @@ if (isset($_GET['edit_vocab'])) {
                             <strong><?= htmlspecialchars($row['text_id']) ?></strong><br>
                             <span style="color:#64748b"><?= htmlspecialchars($row['text_en']) ?></span>
                         </td>
+                        <?php if ($_SESSION['user_role'] === 'admin'): ?>
+                            <td><span style="font-size: 0.8rem; color: #64748b; background: #f8fafc; padding: 2px 6px; border-radius: 4px; border: 1px solid #e2e8f0;"><?= htmlspecialchars($row['creator_name'] ?? 'System') ?></span></td>
+                        <?php endif; ?>
                         <td>
                             <a href="manage.php?edit_sentence=<?= $row['id'] ?>" class="btn-edit">Edit</a>
                             <form method="POST" style="display:inline;" onsubmit="return confirm('Are you sure?')">

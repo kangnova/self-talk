@@ -40,7 +40,7 @@ if ($action === 'get_entries') {
         $stmt->execute($params);
         $total = $stmt->fetchColumn();
         
-        $stmt = $pdo->prepare("SELECT * FROM talk_entries WHERE $where_clause ORDER BY id ASC");
+        $stmt = $pdo->prepare("SELECT talk_entries.*, users.fullname as creator_name FROM talk_entries LEFT JOIN users ON talk_entries.user_id = users.id WHERE $where_clause ORDER BY id ASC");
         $stmt->execute($params);
         $entries = $stmt->fetchAll();
     } else {
@@ -51,7 +51,7 @@ if ($action === 'get_entries') {
         $stmt->execute($params);
         $total = $stmt->fetchColumn();
         
-        $stmt = $pdo->prepare("SELECT * FROM talk_entries WHERE $where_clause ORDER BY id ASC LIMIT $limit OFFSET $offset");
+        $stmt = $pdo->prepare("SELECT talk_entries.*, users.fullname as creator_name FROM talk_entries LEFT JOIN users ON talk_entries.user_id = users.id WHERE $where_clause ORDER BY id ASC LIMIT $limit OFFSET $offset");
         $stmt->execute($params);
         $entries = $stmt->fetchAll();
     }
