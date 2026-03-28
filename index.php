@@ -61,8 +61,10 @@ if ($is_admin && isset($_GET['user_id'])) {
             display: flex;
             flex-direction: column;
             overflow-y: auto;
-            transition: all 0.3s ease;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 20;
         }
+        .sidebar.collapsed { width: 0; min-width: 0; border-right: none; }
 
         .sidebar-header {
             padding: 20px;
@@ -70,7 +72,12 @@ if ($is_admin && isset($_GET['user_id'])) {
             font-size: 1.2rem;
             color: var(--primary);
             border-bottom: 1px solid #f1f5f9;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
+        .btn-close-sidebar { background: none; border: none; color: #94a3b8; font-size: 1.2rem; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+        .btn-close-sidebar:hover { color: var(--primary); }
 
         .archive-list { padding: 10px; }
         .archive-year { font-weight: bold; margin: 15px 10px 5px; color: #64748b; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; }
@@ -158,45 +165,24 @@ if ($is_admin && isset($_GET['user_id'])) {
         .page-btn[disabled] { opacity: 0.5; cursor: not-allowed; }
         .page-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
 
-        /* Sidebar Toggle Mobile */
-        .menu-toggle { display: none; }
+        /* Sidebar Toggle Mobile & Desktop */
+        .menu-toggle { display: block; border: none; background: white; width: 40px; height: 40px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); color: var(--primary); font-size: 1.2rem; cursor: pointer; transition: all 0.2s; margin-right: 15px; }
+        .menu-toggle:hover { background: #f8fafc; transform: scale(1.05); }
+        .sidebar.collapsed + .main-container .menu-toggle { display: block; }
         
         @media (max-width: 768px) {
-            .sidebar { position: fixed; left: -100%; height: 100%; z-index: 30; background: white; transition: all 0.3s ease; }
+            .sidebar { position: fixed; left: -100%; height: 100%; z-index: 20; background: white; }
             .sidebar.open { left: 0; box-shadow: 10px 0 30px rgba(0,0,0,0.1); }
             .menu-toggle { display: block; background: none; color: var(--primary); font-size: 1.5rem; }
-            
-            .sidebar-overlay { 
-                display: none; 
-                position: fixed; 
-                top: 0; left: 0; 
-                width: 100%; height: 100%; 
-                background: rgba(0,0,0,0.5); 
-                z-index: 25; 
-            }
-            .sidebar-overlay.open { display: block; }
-            .close-sidebar { display: block !important; }
-        }
-        .close-sidebar { 
-            display: none; 
-            position: absolute; 
-            right: 15px; top: 18px; 
-            background: none; 
-            color: white; 
-            font-size: 1.5rem; 
-            padding: 0; 
-            width: auto; 
-            height: auto;
         }
     </style>
 </head>
 <body>
 
-    <div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleSidebar()"></div>
     <div class="sidebar" id="sidebar">
         <div class="sidebar-header">
-            Arsip Self-Talk
-            <button class="close-sidebar" onclick="toggleSidebar()">&times;</button>
+            <span>Arsip Self-Talk</span>
+            <button class="btn-close-sidebar" onclick="toggleSidebar()" title="Tutup Sidebar">✕</button>
         </div>
         <div class="archive-list" id="archive-list">
             <!-- Loaded via JS -->
@@ -206,10 +192,12 @@ if ($is_admin && isset($_GET['user_id'])) {
 
     <div class="main-container">
         <div class="header-section">
-            <div class="top-header">
-                <button class="menu-toggle" onclick="toggleSidebar()">☰ Menu</button>
-                
-                <div style="display: flex; align-items: center; gap: 20px;">
+            <div class="top-header" style="display: flex; align-items: center; gap: 20px;">
+                <div style="display: flex; align-items: center;">
+                    <button class="menu-toggle" onclick="toggleSidebar()" title="Buka Sidebar">☰</button>
+                    <h1 style="margin: 0; font-size: 1.5rem; color: var(--primary); font-weight: 800; white-space: nowrap;">English Self-Talk</h1>
+                </div>
+                <div style="display: flex; align-items: center; gap: 20px; flex: 1; justify-content: flex-end;">
                     <div class="user-info">
                         <?php if ($viewing_other): ?>
                             <div style="background: #fef3c7; padding: 6px 12px; border-radius: 8px; border: 1px solid #fbbf24; font-size: 0.85rem; color: #92400e; font-weight: 600;">
@@ -389,8 +377,11 @@ if ($is_admin && isset($_GET['user_id'])) {
         }
 
         function toggleSidebar() {
-            document.getElementById('sidebar').classList.toggle('open');
-            document.getElementById('sidebar-overlay').classList.toggle('open');
+            const sidebar = document.getElementById('sidebar');
+            sidebar.classList.toggle('collapsed');
+            if (window.innerWidth <= 768) {
+                sidebar.classList.toggle('open'); // Mobile behavior
+            }
         }
 
         function updateProgress() {
