@@ -162,16 +162,42 @@ if ($is_admin && isset($_GET['user_id'])) {
         .menu-toggle { display: none; }
         
         @media (max-width: 768px) {
-            .sidebar { position: fixed; left: -100%; height: 100%; z-index: 20; background: white; }
+            .sidebar { position: fixed; left: -100%; height: 100%; z-index: 30; background: white; transition: all 0.3s ease; }
             .sidebar.open { left: 0; box-shadow: 10px 0 30px rgba(0,0,0,0.1); }
             .menu-toggle { display: block; background: none; color: var(--primary); font-size: 1.5rem; }
+            
+            .sidebar-overlay { 
+                display: none; 
+                position: fixed; 
+                top: 0; left: 0; 
+                width: 100%; height: 100%; 
+                background: rgba(0,0,0,0.5); 
+                z-index: 25; 
+            }
+            .sidebar-overlay.open { display: block; }
+            .close-sidebar { display: block !important; }
+        }
+        .close-sidebar { 
+            display: none; 
+            position: absolute; 
+            right: 15px; top: 18px; 
+            background: none; 
+            color: white; 
+            font-size: 1.5rem; 
+            padding: 0; 
+            width: auto; 
+            height: auto;
         }
     </style>
 </head>
 <body>
 
+    <div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleSidebar()"></div>
     <div class="sidebar" id="sidebar">
-        <div class="sidebar-header">Arsip Self-Talk</div>
+        <div class="sidebar-header">
+            Arsip Self-Talk
+            <button class="close-sidebar" onclick="toggleSidebar()">&times;</button>
+        </div>
         <div class="archive-list" id="archive-list">
             <!-- Loaded via JS -->
             <p style="padding: 20px; color:#64748b; font-size: 0.8rem;">Memuat arsip...</p>
@@ -364,6 +390,7 @@ if ($is_admin && isset($_GET['user_id'])) {
 
         function toggleSidebar() {
             document.getElementById('sidebar').classList.toggle('open');
+            document.getElementById('sidebar-overlay').classList.toggle('open');
         }
 
         function updateProgress() {
