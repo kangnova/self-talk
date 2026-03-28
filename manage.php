@@ -170,7 +170,75 @@ if (isset($_GET['edit_vocab'])) {
             <div class="message"><?= $message ?></div>
         <?php endif; ?>
 
-        <!-- SECTION 1: SENTENCES -->
+        <!-- SECTION 1: VOCABULARY LIST (GLOBAL) -->
+        <section id="vocab-section" style="margin-bottom: 50px; border: 1px solid #e2e8f0; padding: 20px; border-radius: 8px;">
+            <h2><?= $edit_vocab ? "Edit Vocabulary" : "Add General Vocabulary" ?></h2>
+            <form method="POST" action="manage.php">
+                <input type="hidden" name="action" value="save">
+                <input type="hidden" name="type" value="vocab">
+                <?php if ($edit_vocab): ?>
+                    <input type="hidden" name="id" value="<?= $edit_vocab['id'] ?>">
+                <?php endif; ?>
+
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+                    <div class="form-group">
+                        <label>Word (ID)</label>
+                        <input type="text" name="word_id" value="<?= $edit_vocab['word_id'] ?? '' ?>" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Word (EN)</label>
+                        <input type="text" name="word_en" value="<?= $edit_vocab['word_en'] ?? '' ?>" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Pronunciation</label>
+                        <input type="text" name="pronunciation" value="<?= $edit_vocab['pronunciation'] ?? '' ?>">
+                    </div>
+                </div>
+                
+                <button type="submit" class="btn-save"><?= $edit_vocab ? "Update Vocabulary" : "Save Vocabulary" ?></button>
+                <?php if ($edit_vocab): ?>
+                    <a href="manage.php" class="btn-cancel">Cancel</a>
+                <?php endif; ?>
+            </form>
+
+            <h3 style="margin-top: 30px;">Vocabulary List</h3>
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th style="width: 50px;">No</th>
+                            <th>Word (ID)</th>
+                            <th>Word (EN)</th>
+                            <th>Pronunciation</th>
+                            <th style="width: 150px;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($vocabs as $index => $row): ?>
+                        <tr>
+                            <td><?= $index + 1 ?></td>
+                            <td style="font-weight: 600; color: var(--primary);"><?= htmlspecialchars($row['word_id']) ?></td>
+                            <td><?= htmlspecialchars($row['word_en']) ?></td>
+                            <td style="color: #64748b; font-size: 0.9rem; font-style: italic;"><?= htmlspecialchars($row['pronunciation']) ?></td>
+                            <td>
+                                <div style="display: flex; gap: 8px;">
+                                    <a href="manage.php?edit_vocab=<?= $row['id'] ?>#vocab-section" class="btn-edit">Edit</a>
+                                    <form method="POST" style="display:inline;" onsubmit="return confirm('Are you sure?')">
+                                        <input type="hidden" name="action" value="delete">
+                                        <input type="hidden" name="type" value="vocab">
+                                        <input type="hidden" name="id" value="<?= $row['id'] ?>">
+                                        <button type="submit" class="btn-delete">Del</button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- SECTION 2: SENTENCES -->
         <section style="margin-bottom: 50px; border: 1px solid #e2e8f0; padding: 20px; border-radius: 8px;">
             <h2><?= $edit_entry ? "Edit Sentence" : "Add New Sentence" ?></h2>
             <form method="POST" action="manage.php">
@@ -252,74 +320,6 @@ if (isset($_GET['edit_vocab'])) {
                                     <form method="POST" style="display:inline;" onsubmit="return confirm('Are you sure?')">
                                         <input type="hidden" name="action" value="delete">
                                         <input type="hidden" name="type" value="sentence">
-                                        <input type="hidden" name="id" value="<?= $row['id'] ?>">
-                                        <button type="submit" class="btn-delete">Del</button>
-                                    </form>
-                                </div>
-                            </td>
-                        </tr>
-                        <?php endforeach; ?>
-                    </tbody>
-                </table>
-            </div>
-        </section>
-        
-        <!-- SECTION 2: VOCABULARY LIST (GLOBAL) -->
-        <section style="margin-bottom: 50px; border: 1px solid #e2e8f0; padding: 20px; border-radius: 8px;">
-            <h2><?= $edit_vocab ? "Edit Vocabulary" : "Add General Vocabulary" ?></h2>
-            <form method="POST" action="manage.php">
-                <input type="hidden" name="action" value="save">
-                <input type="hidden" name="type" value="vocab">
-                <?php if ($edit_vocab): ?>
-                    <input type="hidden" name="id" value="<?= $edit_vocab['id'] ?>">
-                <?php endif; ?>
-
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
-                    <div class="form-group">
-                        <label>Word (ID)</label>
-                        <input type="text" name="word_id" value="<?= $edit_vocab['word_id'] ?? '' ?>" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Word (EN)</label>
-                        <input type="text" name="word_en" value="<?= $edit_vocab['word_en'] ?? '' ?>" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Pronunciation</label>
-                        <input type="text" name="pronunciation" value="<?= $edit_vocab['pronunciation'] ?? '' ?>">
-                    </div>
-                </div>
-                
-                <button type="submit" class="btn-save"><?= $edit_vocab ? "Update Vocabulary" : "Save Vocabulary" ?></button>
-                <?php if ($edit_vocab): ?>
-                    <a href="manage.php" class="btn-cancel">Cancel</a>
-                <?php endif; ?>
-            </form>
-
-            <h3 style="margin-top: 30px;">Vocabulary List</h3>
-            <div class="table-responsive">
-                <table>
-                    <thead>
-                        <tr>
-                            <th style="width: 50px;">No</th>
-                            <th>Word (ID)</th>
-                            <th>Word (EN)</th>
-                            <th>Pronunciation</th>
-                            <th style="width: 150px;">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php foreach ($vocabs as $index => $row): ?>
-                        <tr>
-                            <td><?= $index + 1 ?></td>
-                            <td style="font-weight: 600; color: var(--primary);"><?= htmlspecialchars($row['word_id']) ?></td>
-                            <td><?= htmlspecialchars($row['word_en']) ?></td>
-                            <td style="color: #64748b; font-size: 0.9rem; font-style: italic;"><?= htmlspecialchars($row['pronunciation']) ?></td>
-                            <td>
-                                <div style="display: flex; gap: 8px;">
-                                    <a href="manage.php?edit_vocab=<?= $row['id'] ?>#vocab-section" class="btn-edit">Edit</a>
-                                    <form method="POST" style="display:inline;" onsubmit="return confirm('Are you sure?')">
-                                        <input type="hidden" name="action" value="delete">
-                                        <input type="hidden" name="type" value="vocab">
                                         <input type="hidden" name="id" value="<?= $row['id'] ?>">
                                         <button type="submit" class="btn-delete">Del</button>
                                     </form>
