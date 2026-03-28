@@ -8,7 +8,7 @@ if (!isset($_SESSION['user_id'])) {
 }
 
 $user_id = $_SESSION['user_id'];
-$pdo->exec("USE `self_talk_db` "); // Ensure using the right database
+$pdo->exec("USE `$db` "); // Ensure using the right database
 
 $manage_user_id = $user_id;
 if ($_SESSION['user_role'] === 'admin' && isset($_GET['user_id'])) {

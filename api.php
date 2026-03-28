@@ -1,6 +1,6 @@
 <?php
 require_once 'config.php';
-$pdo->exec("USE `self_talk_db` ");
+$pdo->exec("USE `$db` ");
 
 header('Content-Type: application/json');
 

@@ -3,8 +3,8 @@ require_once 'config.php';
 
 try {
     // 1. Create database if not exists
-    $pdo->exec("CREATE DATABASE IF NOT EXISTS `self_talk_db` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci");
-    echo "Database `self_talk_db` created or already exists.<br>";
+    $pdo->exec("CREATE DATABASE IF NOT EXISTS `$db` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci");
+    echo "Database `$db` created or already exists.<br>";
 
     // 2. Select the database
     $pdo->exec("USE `self_talk_db`");
