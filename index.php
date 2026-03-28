@@ -12,179 +12,293 @@
             --bg: #f8fafc;
             --text: #1e293b;
             --card-bg: #ffffff;
+            --sidebar-w: 260px;
         }
 
+        * { box-sizing: border-box; }
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Inter', -apple-system, sans-serif;
             background-color: var(--bg);
             color: var(--text);
             margin: 0;
-            padding: 20px;
             display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        .header-section {
-            width: 100%;
-            max-width: 500px;
-            text-align: center;
-            position: sticky;
-            top: 0;
-            background: var(--bg);
-            padding: 10px 0;
-            z-index: 10;
-        }
-
-        h2 { color: var(--primary); margin: 0; }
-        
-        /* Progress Tracker Styles */
-        .progress-container {
-            width: 100%;
-            background: #e2e8f0;
-            border-radius: 10px;
-            height: 12px;
-            margin: 15px 0;
+            height: 100vh;
             overflow: hidden;
         }
 
-        #progress-bar {
-            width: 0%;
-            height: 100%;
-            background: var(--secondary);
-            transition: width 0.5s ease;
+        /* Sidebar Styles */
+        .sidebar {
+            width: var(--sidebar-w);
+            background: white;
+            border-right: 1px solid #e2e8f0;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            transition: all 0.3s ease;
         }
 
-        .stats { font-size: 0.85rem; font-weight: bold; color: var(--secondary); }
+        .sidebar-header {
+            padding: 20px;
+            font-weight: 800;
+            font-size: 1.2rem;
+            color: var(--primary);
+            border-bottom: 1px solid #f1f5f9;
+        }
 
-        .container { width: 100%; max-width: 500px; padding-bottom: 50px; }
+        .archive-list { padding: 10px; }
+        .archive-year { font-weight: bold; margin: 15px 10px 5px; color: #64748b; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; }
+        .archive-month { padding: 8px 15px; cursor: pointer; border-radius: 8px; font-size: 0.9rem; transition: background 0.2s; display: flex; align-items: center; }
+        .archive-month:hover { background: #f1f5f9; }
+        .archive-month.active { background: #eff6ff; color: var(--primary); font-weight: 600; }
+        .archive-item { padding: 5px 15px 5px 30px; font-size: 0.8rem; color: #475569; cursor: pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .archive-item:hover { color: var(--primary); }
+
+        /* Main Content Styles */
+        .main-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        .header-section {
+            padding: 20px 40px;
+            background: rgba(248, 250, 252, 0.8);
+            backdrop-filter: blur(10px);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .header-top { display: flex; justify-content: space-between; align-items: center; }
+        .header-top h2 { margin: 0; font-size: 1.5rem; }
+
+        .controls { display: flex; gap: 10px; align-items: center; margin-top: 15px; }
+        select { padding: 5px 10px; border-radius: 6px; border: 1px solid #cbd5e1; outline: none; }
+
+        .progress-container { flex: 1; background: #e2e8f0; border-radius: 10px; height: 8px; overflow: hidden; }
+        #progress-bar { width: 0%; height: 100%; background: var(--secondary); transition: width 0.5s ease; }
+
+        .content-body {
+            max-width: 600px;
+            margin: 20px auto;
+            padding: 0 20px 100px;
+            width: 100%;
+        }
 
         .card {
             background: var(--card-bg);
-            border-radius: 12px;
-            padding: 15px;
+            border-radius: 16px;
+            padding: 20px;
             margin-bottom: 20px;
-            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
-            border-left: 5px solid #cbd5e1;
-            transition: border-color 0.3s;
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.05);
+            border: 1px solid #f1f5f9;
+            transition: transform 0.2s;
         }
+        .card:hover { transform: translateY(-2px); }
+        .card.completed { border-right: 4px solid var(--secondary); }
 
-        .card.completed { border-left-color: var(--secondary); }
-
-        .card-header {
-            font-weight: bold;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid #e2e8f0;
-            padding-bottom: 8px;
-        }
-
-        .content-area {
-            min-height: 70px;
-            margin: 15px 0;
-            font-size: 1.05rem;
-            line-height: 1.6;
-        }
-
-        .btn-group {
-            display: grid;
-            grid-template-columns: 1fr 1fr 1fr;
-            gap: 8px;
-            margin-bottom: 10px;
-        }
-
-        button {
-            padding: 10px 5px;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 0.75rem;
-            font-weight: 600;
-            background: #f1f5f9;
-            color: #475569;
-        }
-
-        button.active { background: var(--primary); color: white; }
-
-        .btn-complete {
-            width: 100%;
-            background: #f8fafc;
-            border: 1px dashed #cbd5e1;
-            color: #64748b;
-            margin-top: 10px;
-        }
-
-        .btn-complete.active {
-            background: var(--secondary);
-            color: white;
-            border-style: solid;
-        }
-
+        .card-header { font-weight: bold; border-bottom: 1px solid #f1f5f9; padding-bottom: 12px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; }
+        .card-content { font-size: 1.1rem; line-height: 1.6; min-height: 60px; }
         .hidden { display: none; }
-        
-        .explanation {
-            font-size: 0.85rem;
-            color: #475569;
-            background: #f1f5f9;
-            padding: 12px;
-            border-radius: 6px;
-            margin-top: 10px;
-            border-left: 3px solid var(--accent);
-        }
 
-        .word-breakdown strong { color: var(--primary); }
+        .btn-group { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 20px; }
+        button { padding: 12px; border: none; border-radius: 10px; cursor: pointer; font-size: 0.85rem; font-weight: 600; transition: all 0.2s; }
+        .btn-toggle { background: #f1f5f9; color: #475569; }
+        .btn-toggle.active { background: var(--primary); color: white; }
+        .btn-mark { margin-top: 15px; width: 100%; background: #f8fafc; border: 1px dashed #cbd5e1; color: #64748b; }
+        .btn-mark.completed { background: var(--secondary); color: white; border-style: solid; }
+
+        /* Pagination Styles */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            padding: 20px 0;
+            margin-top: 20px;
+        }
+        .page-btn { background: white; border: 1px solid #e2e8f0; padding: 8px 15px; color: var(--text); }
+        .page-btn[disabled] { opacity: 0.5; cursor: not-allowed; }
+        .page-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
+
+        /* Sidebar Toggle Mobile */
+        .menu-toggle { display: none; }
+        
+        @media (max-width: 768px) {
+            .sidebar { position: fixed; left: -100%; height: 100%; z-index: 20; background: white; }
+            .sidebar.open { left: 0; box-shadow: 10px 0 30px rgba(0,0,0,0.1); }
+            .menu-toggle { display: block; background: none; color: var(--primary); font-size: 1.5rem; }
+        }
     </style>
 </head>
 <body>
 
-    <div class="header-section">
-        <h2>English Self-Talk</h2>
-        <div style="margin-top: 5px;">
-            <a href="manage.php" style="font-size: 0.75rem; color: var(--primary); text-decoration: none; font-weight: bold; border: 1px solid var(--primary); padding: 2px 8px; border-radius: 20px;">Manage Data</a>
-        </div>
-        <div class="stats" style="margin-top: 10px;">Progress: <span id="progress-text">0/10</span></div>
-        <div class="progress-container">
-            <div id="progress-bar"></div>
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">Arsip Self-Talk</div>
+        <div class="archive-list" id="archive-list">
+            <!-- Loaded via JS -->
+            <p style="padding: 20px; color:#64748b; font-size: 0.8rem;">Memuat arsip...</p>
         </div>
     </div>
 
-    <div class="container">
-        <div id="app"></div>
+    <div class="main-container">
+        <div class="header-section">
+            <div class="header-top">
+                <div style="display: flex; align-items: center; gap: 15px;">
+                    <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
+                    <h2>English Self-Talk</h2>
+                </div>
+                <div style="display: flex; gap: 10px;">
+                    <a href="manage.php" style="font-size: 0.85rem; color: var(--primary); text-decoration: none; font-weight: bold; border: 1.5px solid var(--primary); padding: 8px 16px; border-radius: 12px; transition: all 0.2s;">Kelola Data</a>
+                </div>
+            </div>
+            
+            <div class="controls">
+                <span>Tampilkan:</span>
+                <select id="limit-select" onchange="changeLimit(this.value)">
+                    <option value="10">10 Baris</option>
+                    <option value="50">50 Baris</option>
+                    <option value="100">100 Baris</option>
+                    <option value="150">150 Baris</option>
+                    <option value="all">Semua</option>
+                </select>
+                <div class="progress-container">
+                    <div id="progress-bar"></div>
+                </div>
+                <span class="stats" id="progress-text">0/0</span>
+            </div>
+        </div>
+
+        <div class="content-body">
+            <div id="app"></div>
+            <div id="pagination" class="pagination"></div>
+        </div>
     </div>
 
     <script>
         let data = [];
-        let vocabs = [];
-        let completedItems = [];
+        let archive = {};
+        let currentPage = 1;
+        let currentLimit = 10;
+        let totalItems = 0;
 
         async function init() {
-            try {
-                const ts = new Date().getTime();
-                // Fetch sentences
-                const resEntries = await fetch(`api.php?action=get_entries&t=${ts}`);
-                data = await resEntries.json();
-                
-                // Fetch vocabs
-                const resVocabs = await fetch(`api.php?action=get_vocabs&t=${ts}`);
-                vocabs = await resVocabs.json();
+            await fetchArchive();
+            await fetchData();
+        }
 
+        async function fetchData(page = 1) {
+            currentPage = page;
+            const ts = new Date().getTime();
+            const url = `api.php?action=get_entries&page=${currentPage}&limit=${currentLimit}&t=${ts}`;
+            
+            try {
+                const response = await fetch(url);
+                const result = await response.json();
+                data = result.data;
+                totalItems = result.total;
+                
                 render();
+                renderPagination();
                 updateProgress();
             } catch (err) {
-                console.error("Failed to fetch data:", err);
+                console.error("Fetch error:", err);
             }
         }
 
+        async function fetchArchive() {
+            try {
+                const response = await fetch('api.php?action=get_archive');
+                archive = await response.json();
+                renderArchive();
+            } catch (err) {
+                console.error("Archive error:", err);
+            }
+        }
 
+        function renderArchive() {
+            const list = document.getElementById('archive-list');
+            let html = '';
+            
+            for (const year in archive) {
+                html += `<div class="archive-year">${year}</div>`;
+                for (const month in archive[year]) {
+                    html += `
+                        <div class="archive-month" onclick="toggleMonth(this)">
+                            <span>${month}</span>
+                            <span style="margin-left:auto; font-size:0.7rem; opacity:0.5;">▼</span>
+                        </div>
+                        <div class="month-items hidden">
+                            ${archive[year][month].map(item => `
+                                <div class="archive-item" onclick="scrollToCard(${item.id})">${item.title}</div>
+                            `).join('')}
+                        </div>
+                    `;
+                }
+            }
+            list.innerHTML = html;
+        }
+
+        function toggleMonth(el) {
+            const items = el.nextElementSibling;
+            items.classList.toggle('hidden');
+            el.classList.toggle('active');
+        }
+
+        function scrollToCard(id) {
+            // If item is not on current page, we might need a jump-to behavior.
+            // For now, let's just alert or implement basic search.
+            alert("Sent: " + id + ". Fitur lompat ke halaman otomatis akan segera hadir!");
+        }
+
+        function renderPagination() {
+            const container = document.getElementById('pagination');
+            if (currentLimit === 'all') {
+                container.innerHTML = '';
+                return;
+            }
+
+            const totalPages = Math.ceil(totalItems / currentLimit);
+            let html = `
+                <button class="page-btn" ${currentPage === 1 ? 'disabled' : ''} onclick="changePage(${currentPage - 1})">Prev</button>
+            `;
+
+            for (let i = 1; i <= totalPages; i++) {
+                if (i === 1 || i === totalPages || (i >= currentPage - 2 && i <= currentPage + 2)) {
+                    html += `<button class="page-btn ${i === currentPage ? 'active' : ''}" onclick="changePage(${i})">${i}</button>`;
+                } else if (i === currentPage - 3 || i === currentPage + 3) {
+                    html += `<span>...</span>`;
+                }
+            }
+
+            html += `
+                <button class="page-btn" ${currentPage === totalPages ? 'disabled' : ''} onclick="changePage(${currentPage + 1})">Next</button>
+            `;
+            container.innerHTML = html;
+        }
+
+        function changePage(p) {
+            fetchData(p);
+            document.querySelector('.main-container').scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function changeLimit(l) {
+            currentLimit = l;
+            fetchData(1);
+        }
+
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('open');
+        }
 
         function updateProgress() {
-            const total = data.length;
             const count = data.filter(item => item.is_completed == 1).length;
-            const percent = total > 0 ? (count / total) * 100 : 0;
-            
+            const percent = totalItems > 0 ? (count / data.length) * 100 : 0; // Local page progress
             document.getElementById('progress-bar').style.width = percent + '%';
-            document.getElementById('progress-text').innerText = `${count}/${total}`;
+            document.getElementById('progress-text').innerText = `${count}/${data.length} (Halaman ini)`;
         }
 
         async function toggleComplete(id) {
@@ -197,82 +311,79 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ id: id, status: newStatus })
                 });
-                const result = await response.json();
-                if (result.success) {
+                if ((await response.json()).success) {
                     item.is_completed = newStatus;
                     render();
                     updateProgress();
                 }
-            } catch (err) {
-                console.error("Failed to update status:", err);
-            }
+            } catch (err) { console.error(err); }
         }
 
         function render() {
             const app = document.getElementById('app');
             if (data.length === 0) {
-                app.innerHTML = '<p style="text-align:center; color:#64748b;">Belum ada data. Silakan tambah melalui menu Manage.</p>';
+                app.innerHTML = '<p style="text-align:center; color:#64748b; padding: 40px;">Belum ada data di halaman ini.</p>';
                 return;
             }
+            
             app.innerHTML = data.map((item, index) => {
                 const isDone = item.is_completed == 1;
-                const no = index + 1;
+                const displayNo = (currentLimit === 'all') ? index + 1 : ((currentPage - 1) * currentLimit) + index + 1;
                 const vocabHtml = item.vocab_id ? `
-                    <span style="margin-left: 10px; font-weight: normal; font-size: 0.85rem; color: #475569; border-left: 1px solid #cbd5e1; padding-left: 10px;">
-                        ${item.vocab_id} | ${item.vocab_en} <span style="color: var(--secondary); font-style: italic;">(${item.vocab_pron})</span>
+                    <span style="margin-left: 10px; font-weight: normal; font-size: 0.85rem; color: #64748b; border-left: 1px solid #e2e8f0; padding-left: 10px;">
+                        ${item.vocab_id} | ${item.vocab_en} <span style="font-style: italic; opacity:0.7;">(${item.vocab_pron})</span>
                     </span>
                 ` : '';
 
                 return `
                 <div class="card ${isDone ? 'completed' : ''}" id="card-${item.id}">
-                    <div class="card-header" style="display: flex; align-items: center; justify-content: space-between;">
+                    <div class="card-header">
                         <div style="display: flex; align-items: center;">
-                            <strong>No. ${no}</strong>
+                            <span style="color: var(--primary);">No. ${displayNo}</span>
                             ${vocabHtml}
                         </div>
                         ${isDone ? '<span style="color:var(--secondary); font-size: 0.8rem;">✔ Lancar</span>' : ''}
                     </div>
                     
-                    <div class="content-area">
+                    <div class="card-content">
                         <div id="text-id-${item.id}">${item.text_id}</div>
                         <div id="text-en-${item.id}" class="hidden"><strong>${item.text_en}</strong></div>
                         <div id="text-pron-${item.id}" class="hidden"><em>${item.pronunciation}</em></div>
-                        <div id="text-break-${item.id}" class="hidden explanation word-breakdown">${item.breakdown}</div>
+                        <div id="text-break-${item.id}" class="hidden" style="font-size: 0.9rem; background:#f8fafc; padding:10px; border-radius:8px; border-left:3px solid var(--accent);">${item.breakdown}</div>
                     </div>
 
                     <div class="btn-group">
-                        <button onclick="showContent(${item.id}, 'en')" id="btn-en-${item.id}">English</button>
-                        <button onclick="showContent(${item.id}, 'pron')" id="btn-pron-${item.id}">Cara Baca</button>
-                        <button onclick="showContent(${item.id}, 'break')" id="btn-break-${item.id}">Pecahan</button>
+                        <button class="btn-toggle" onclick="showToggle(${item.id}, 'en')" id="btn-en-${item.id}">English</button>
+                        <button class="btn-toggle" onclick="showToggle(${item.id}, 'pron')" id="btn-pron-${item.id}">Cara Baca</button>
+                        <button class="btn-toggle" onclick="showToggle(${item.id}, 'break')" id="btn-break-${item.id}">Pecahan</button>
                     </div>
 
-                    <button class="btn-complete ${isDone ? 'active' : ''}" onclick="toggleComplete(${item.id})">
-                        ${isDone ? 'Selesai (Klik untuk Batal)' : 'Tandai Sudah Lancar'}
+                    <button class="btn-mark ${isDone ? 'completed' : ''}" onclick="toggleComplete(${item.id})">
+                        ${isDone ? 'Selesai ✓' : 'Tandai Sudah Lancar'}
                     </button>
                 </div>
             `}).join('');
         }
 
-        function showContent(id, type) {
+        function showToggle(id, type) {
             const idEl = document.getElementById(`text-id-${id}`);
             const enEl = document.getElementById(`text-en-${id}`);
             const pronEl = document.getElementById(`text-pron-${id}`);
             const breakEl = document.getElementById(`text-break-${id}`);
-            const allBtns = document.querySelectorAll(`#card-${id} .btn-group button`);
-            const targetBtn = document.getElementById(`btn-${type}-${id}`);
+            const btn = document.getElementById(`btn-${type}-${id}`);
+            const isAct = btn.classList.contains('active');
 
-            if (!targetBtn.classList.contains('active')) {
-                allBtns.forEach(b => b.classList.remove('active'));
-                targetBtn.classList.add('active');
-                [idEl, enEl, pronEl, breakEl].forEach(el => el.classList.add('hidden'));
+            // Reset
+            document.querySelectorAll(`#card-${id} .btn-toggle`).forEach(b => b.classList.remove('active'));
+            [idEl, enEl, pronEl, breakEl].forEach(el => el.classList.add('hidden'));
 
-                if (type === 'en') { enEl.classList.remove('hidden'); } 
-                else if (type === 'pron') { pronEl.classList.remove('hidden'); idEl.classList.remove('hidden'); } 
-                else if (type === 'break') { breakEl.classList.remove('hidden'); }
+            if (!isAct) {
+                btn.classList.add('active');
+                if (type === 'en') enEl.classList.remove('hidden');
+                else if (type === 'pron') { pronEl.classList.remove('hidden'); idEl.classList.remove('hidden'); }
+                else if (type === 'break') breakEl.classList.remove('hidden');
             } else {
-                targetBtn.classList.remove('active');
                 idEl.classList.remove('hidden');
-                [enEl, pronEl, breakEl].forEach(el => el.classList.add('hidden'));
             }
         }
 
