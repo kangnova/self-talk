@@ -93,6 +93,7 @@ $users = $stmt->fetchAll();
                             <td><?= date('d M Y', strtotime($u['created_at'])) ?></td>
                             <td>
                                 <div style="display: flex; gap: 5px;">
+                                    <a href="index.php?user_id=<?= $u['id'] ?>" class="btn" style="background: #d1fae5; color: #065f46;">Lihat Dashboard</a>
                                     <a href="manage.php?user_id=<?= $u['id'] ?>" class="btn btn-manage">Manage Isi</a>
                                     <?php if ($u['id'] != $_SESSION['user_id']): ?>
                                         <form method="POST" style="display: inline;" onsubmit="return confirm('Hapus user ini?')">

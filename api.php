@@ -13,6 +13,12 @@ if (!isset($_SESSION['user_id'])) {
 }
 
 $user_id = $_SESSION['user_id'];
+
+// Admin can override user_id to view other users' data
+if ($_SESSION['user_role'] === 'admin' && isset($_GET['user_id'])) {
+    $user_id = $_GET['user_id'];
+}
+
 $action = $_GET['action'] ?? '';
 
 if ($action === 'get_entries') {

@@ -9,6 +9,20 @@ if (!isset($_SESSION['user_id'])) {
 
 $user_name = $_SESSION['user_name'] ?: $_SESSION['user_email'];
 $is_admin = ($_SESSION['user_role'] === 'admin');
+
+$target_user_id = $_SESSION['user_id'];
+$viewing_other = false;
+$target_name = "";
+
+if ($is_admin && isset($_GET['user_id'])) {
+    $target_user_id = $_GET['user_id'];
+    $viewing_other = true;
+    
+    $stmt = $pdo->prepare("SELECT fullname, email FROM users WHERE id = ?");
+    $stmt->execute([$target_user_id]);
+    $t_user = $stmt->fetch();
+    $target_name = ($t_user['fullname'] ?: $t_user['email']) ?? "Unknown User";
+}
 ?>
 
 <!DOCTYPE html>
@@ -171,6 +185,12 @@ $is_admin = ($_SESSION['user_role'] === 'admin');
                 
                 <div style="display: flex; align-items: center; gap: 20px;">
                     <div class="user-info">
+                        <?php if ($viewing_other): ?>
+                            <div style="background: #fef3c7; padding: 6px 12px; border-radius: 8px; border: 1px solid #fbbf24; font-size: 0.85rem; color: #92400e; font-weight: 600;">
+                                Viewing Account: <strong><?= htmlspecialchars($target_name) ?></strong>
+                            </div>
+                        <?php endif; ?>
+
                         <?php if ($is_admin): ?>
                             <a href="admin_users.php" class="btn-admin">Managemen User</a>
                         <?php endif; ?>
@@ -179,7 +199,7 @@ $is_admin = ($_SESSION['user_role'] === 'admin');
                         <a href="logout.php" class="btn-logout">Logout</a>
                     </div>
                     <div class="header-nav">
-                        <a href="manage.php" class="btn-manage">+ Tambah Kalimat</a>
+                        <a href="manage.php<?= $viewing_other ? "?user_id=$target_user_id" : "" ?>" class="btn-manage">+ Tambah Kalimat</a>
                     </div>
                 </div>
             </div>
@@ -207,6 +227,7 @@ $is_admin = ($_SESSION['user_role'] === 'admin');
     </div>
 
     <script>
+        const targetUserId = <?= json_encode($target_user_id) ?>;
         let data = [];
         let archive = {};
         let currentPage = 1;
@@ -221,7 +242,7 @@ $is_admin = ($_SESSION['user_role'] === 'admin');
         async function fetchData(page = 1) {
             currentPage = page;
             const ts = new Date().getTime();
-            const url = `api.php?action=get_entries&page=${currentPage}&limit=${currentLimit}&t=${ts}`;
+            const url = `api.php?action=get_entries&user_id=${targetUserId}&page=${currentPage}&limit=${currentLimit}&t=${ts}`;
             
             try {
                 const response = await fetch(url);
@@ -239,7 +260,7 @@ $is_admin = ($_SESSION['user_role'] === 'admin');
 
         async function fetchArchive() {
             try {
-                const response = await fetch('api.php?action=get_archive');
+                const response = await fetch(`api.php?action=get_archive&user_id=${targetUserId}`);
                 archive = await response.json();
                 renderArchive();
             } catch (err) {
