@@ -13,10 +13,20 @@ if (!isset($_SESSION['user_id'])) {
 }
 
 $user_id = $_SESSION['user_id'];
+$where_clause = "user_id = ?";
+$params = [$user_id];
 
-// Admin can override user_id to view other users' data
-if ($_SESSION['user_role'] === 'admin' && isset($_GET['user_id'])) {
-    $user_id = $_GET['user_id'];
+// Admin viewing logic
+if ($_SESSION['user_role'] === 'admin') {
+    if (isset($_GET['user_id'])) {
+        // Viewing specific user
+        $user_id = $_GET['user_id'];
+        $params = [$user_id];
+    } else {
+        // Viewing shared admin pool
+        $where_clause = "user_id IN (SELECT id FROM users WHERE role = 'admin')";
+        $params = [];
+    }
 }
 
 $action = $_GET['action'] ?? '';
@@ -26,23 +36,23 @@ if ($action === 'get_entries') {
     $page = $_GET['page'] ?? 1;
     
     if ($limit === 'all') {
-        $stmt = $pdo->prepare("SELECT COUNT(*) FROM talk_entries WHERE user_id = ?");
-        $stmt->execute([$user_id]);
+        $stmt = $pdo->prepare("SELECT COUNT(*) FROM talk_entries WHERE $where_clause");
+        $stmt->execute($params);
         $total = $stmt->fetchColumn();
         
-        $stmt = $pdo->prepare("SELECT * FROM talk_entries WHERE user_id = ? ORDER BY id ASC");
-        $stmt->execute([$user_id]);
+        $stmt = $pdo->prepare("SELECT * FROM talk_entries WHERE $where_clause ORDER BY id ASC");
+        $stmt->execute($params);
         $entries = $stmt->fetchAll();
     } else {
         $limit = (int)$limit;
         $offset = ($page - 1) * $limit;
         
-        $stmt = $pdo->prepare("SELECT COUNT(*) FROM talk_entries WHERE user_id = ?");
-        $stmt->execute([$user_id]);
+        $stmt = $pdo->prepare("SELECT COUNT(*) FROM talk_entries WHERE $where_clause");
+        $stmt->execute($params);
         $total = $stmt->fetchColumn();
         
-        $stmt = $pdo->prepare("SELECT * FROM talk_entries WHERE user_id = ? ORDER BY id ASC LIMIT $limit OFFSET $offset");
-        $stmt->execute([$user_id]);
+        $stmt = $pdo->prepare("SELECT * FROM talk_entries WHERE $where_clause ORDER BY id ASC LIMIT $limit OFFSET $offset");
+        $stmt->execute($params);
         $entries = $stmt->fetchAll();
     }
     
@@ -51,8 +61,8 @@ if ($action === 'get_entries') {
 }
 
 if ($action === 'get_archive') {
-    $stmt = $pdo->prepare("SELECT id, vocab_id, text_id, created_at FROM talk_entries WHERE user_id = ? ORDER BY id ASC");
-    $stmt->execute([$user_id]);
+    $stmt = $pdo->prepare("SELECT id, vocab_id, text_id, created_at FROM talk_entries WHERE $where_clause ORDER BY id ASC");
+    $stmt->execute($params);
     $entries = $stmt->fetchAll(PDO::FETCH_ASSOC);
     
     $archive = [];

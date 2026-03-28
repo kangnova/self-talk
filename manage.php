@@ -11,16 +11,28 @@ $user_id = $_SESSION['user_id'];
 $pdo->exec("USE `$db` "); // Ensure using the right database
 
 $manage_user_id = $user_id;
-if ($_SESSION['user_role'] === 'admin' && isset($_GET['user_id'])) {
-    $manage_user_id = $_GET['user_id'];
+$is_admin_shared_mode = false;
+if ($_SESSION['user_role'] === 'admin') {
+    if (isset($_GET['user_id'])) {
+        $manage_user_id = $_GET['user_id'];
+    } else {
+        $is_admin_shared_mode = true;
+    }
+}
+
+function get_auth_query($is_admin_shared_mode, $manage_user_id) {
+    if ($is_admin_shared_mode) {
+        return ["user_id IN (SELECT id FROM users WHERE role = 'admin')", []];
+    }
+    return ["user_id = ?", [$manage_user_id]];
 }
 
 $message = "";
 
 // Handle Create / Update / Delete for Sentences
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['type']) && $_POST['type'] === 'sentence') {
-    if (isset($_POST['action'])) {
-        try {
+            list($auth_where, $auth_params) = get_auth_query($is_admin_shared_mode, $manage_user_id);
+            
             if ($_POST['action'] === 'save') {
                 $id = $_POST['id'] ?? null;
                 $text_id = $_POST['text_id'];
@@ -32,8 +44,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['type']) && $_POST['ty
                 $vocab_pron = $_POST['vocab_pron'];
 
                 if ($id) {
-                    $stmt = $pdo->prepare("UPDATE talk_entries SET text_id=?, text_en=?, pronunciation=?, breakdown=?, vocab_id=?, vocab_en=?, vocab_pron=? WHERE id=? AND user_id=?");
-                    $stmt->execute([$text_id, $text_en, $pronunciation, $breakdown, $vocab_id, $vocab_en, $vocab_pron, $id, $manage_user_id]);
+                    $sql = "UPDATE talk_entries SET text_id=?, text_en=?, pronunciation=?, breakdown=?, vocab_id=?, vocab_en=?, vocab_pron=? WHERE id=? AND $auth_where";
+                    $stmt = $pdo->prepare($sql);
+                    $stmt->execute(array_merge([$text_id, $text_en, $pronunciation, $breakdown, $vocab_id, $vocab_en, $vocab_pron, $id], $auth_params));
                     $message = "Sentence updated successfully!";
                 } else {
                     $stmt = $pdo->prepare("INSERT INTO talk_entries (user_id, text_id, text_en, pronunciation, breakdown, vocab_id, vocab_en, vocab_pron) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
@@ -42,8 +55,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['type']) && $_POST['ty
                 }
             } elseif ($_POST['action'] === 'delete') {
                 $id = $_POST['id'];
-                $stmt = $pdo->prepare("DELETE FROM talk_entries WHERE id=? AND user_id=?");
-                $stmt->execute([$id, $manage_user_id]);
+                $sql = "DELETE FROM talk_entries WHERE id=? AND $auth_where";
+                $stmt = $pdo->prepare($sql);
+                $stmt->execute(array_merge([$id], $auth_params));
                 $message = "Sentence deleted successfully!";
             }
         } catch (PDOException $e) { $message = "Error: " . $e->getMessage(); }
@@ -79,8 +93,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['type']) && $_POST['ty
     }
 }
 
-// Fetch all entries
-$entries = $pdo->query("SELECT * FROM talk_entries ORDER BY id ASC")->fetchAll();
+// Fetch filtered entries
+list($auth_where, $auth_params) = get_auth_query($is_admin_shared_mode, $manage_user_id);
+$stmt = $pdo->prepare("SELECT * FROM talk_entries WHERE $auth_where ORDER BY id ASC");
+$stmt->execute($auth_params);
+$entries = $stmt->fetchAll();
 $vocabs = $pdo->query("SELECT * FROM vocabulary ORDER BY id ASC")->fetchAll();
 
 // Edit mode for sentence
