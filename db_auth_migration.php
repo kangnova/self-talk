@@ -38,6 +38,10 @@ try {
         echo "Admin already exists.<br>";
     }
 
+    // 4. Migrate existing NULL user_id entries to the default admin
+    $pdo->exec("UPDATE talk_entries SET user_id = (SELECT id FROM users WHERE role = 'admin' ORDER BY id ASC LIMIT 1) WHERE user_id IS NULL");
+    echo "Legacy data migrated to admin pool.<br>";
+
 } catch (PDOException $e) {
     die("Error: " . $e->getMessage());
 }

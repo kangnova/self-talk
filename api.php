@@ -18,12 +18,13 @@ $params = [$user_id];
 
 // Admin viewing logic
 if ($_SESSION['user_role'] === 'admin') {
-    if (isset($_GET['user_id'])) {
-        // Viewing specific user
+    if (isset($_GET['user_id']) && $_GET['user_id'] != $_SESSION['user_id']) {
+        // Viewing specific user (Oversight Mode)
         $user_id = $_GET['user_id'];
+        $where_clause = "user_id = ?";
         $params = [$user_id];
     } else {
-        // Viewing shared admin pool
+        // Viewing shared admin pool (Shared Mode)
         $where_clause = "user_id IN (SELECT id FROM users WHERE role = 'admin')";
         $params = [];
     }
@@ -40,7 +41,7 @@ if ($action === 'get_entries') {
         $stmt->execute($params);
         $total = $stmt->fetchColumn();
         
-        $stmt = $pdo->prepare("SELECT talk_entries.*, users.fullname as creator_name FROM talk_entries LEFT JOIN users ON talk_entries.user_id = users.id WHERE $where_clause ORDER BY id ASC");
+        $stmt = $pdo->prepare("SELECT talk_entries.*, COALESCE(users.fullname, users.email, 'Admin') as creator_name FROM talk_entries LEFT JOIN users ON talk_entries.user_id = users.id WHERE $where_clause ORDER BY id ASC");
         $stmt->execute($params);
         $entries = $stmt->fetchAll();
     } else {
@@ -51,7 +52,7 @@ if ($action === 'get_entries') {
         $stmt->execute($params);
         $total = $stmt->fetchColumn();
         
-        $stmt = $pdo->prepare("SELECT talk_entries.*, users.fullname as creator_name FROM talk_entries LEFT JOIN users ON talk_entries.user_id = users.id WHERE $where_clause ORDER BY id ASC LIMIT $limit OFFSET $offset");
+        $stmt = $pdo->prepare("SELECT talk_entries.*, COALESCE(users.fullname, users.email, 'Admin') as creator_name FROM talk_entries LEFT JOIN users ON talk_entries.user_id = users.id WHERE $where_clause ORDER BY id ASC LIMIT $limit OFFSET $offset");
         $stmt->execute($params);
         $entries = $stmt->fetchAll();
     }
@@ -92,8 +93,8 @@ if ($action === 'get_vocabs') {
 
 if ($action === 'toggle_complete') {
     $input = json_decode(file_get_contents('php://input'), true);
-    $stmt = $pdo->prepare("UPDATE talk_entries SET is_completed = ? WHERE id = ? AND user_id = ?");
-    $success = $stmt->execute([$input['status'], $input['id'], $user_id]);
+    $stmt = $pdo->prepare("UPDATE talk_entries SET is_completed = ? WHERE id = ? AND $where_clause");
+    $success = $stmt->execute(array_merge([$input['status'], $input['id']], $params));
     echo json_encode(['success' => $success]);
     exit;
 }
