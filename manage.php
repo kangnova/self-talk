@@ -31,6 +31,8 @@ $message = "";
 
 // Handle Create / Update / Delete for Sentences
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['type']) && $_POST['type'] === 'sentence') {
+    if (isset($_POST['action'])) {
+        try {
             list($auth_where, $auth_params) = get_auth_query($is_admin_shared_mode, $manage_user_id);
             
             if ($_POST['action'] === 'save') {
