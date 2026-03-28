@@ -124,24 +124,39 @@ if (isset($_GET['edit_vocab'])) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Manage Self-Talk - Rin</title>
     <style>
-        :root { --primary: #2563eb; --secondary: #10b981; --accent: #f59e0b; --bg: #f8fafc; --text: #1e293b; --card-bg: #ffffff; }
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: var(--bg); color: var(--text); padding: 20px; }
-        .container { max-width: 800px; margin: 0 auto; background: var(--card-bg); padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); }
-        h1, h2 { color: var(--primary); }
-        .form-group { margin-bottom: 15px; }
-        label { display: block; font-weight: bold; margin-bottom: 5px; }
-        input[type="text"], textarea { width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; box-sizing: border-box; font-family: inherit; }
-        button { padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; }
+        :root { --primary: #2563eb; --secondary: #10b981; --accent: #f59e0b; --bg: #f1f5f9; --text: #1e293b; --card-bg: #ffffff; }
+        * { box-sizing: border-box; }
+        body { font-family: 'Inter', -apple-system, sans-serif; background-color: var(--bg); color: var(--text); padding: 20px; margin: 0; min-height: 100vh; }
+        .container { max-width: 900px; margin: 0 auto; background: var(--card-bg); padding: 30px; border-radius: 16px; box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1); border: 1px solid #e2e8f0; }
+        h1, h2 { color: var(--primary); font-weight: 800; margin-top: 0; }
+        .form-group { margin-bottom: 20px; }
+        label { display: block; font-weight: 600; margin-bottom: 8px; font-size: 0.9rem; color: #475569; }
+        input[type="text"], textarea { width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 10px; box-sizing: border-box; font-family: inherit; font-size: 1rem; transition: border-color 0.2s; }
+        input[type="text"]:focus, textarea:focus { border-color: var(--primary); outline: none; box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1); }
+        button { padding: 12px 24px; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; transition: all 0.2s; font-size: 0.9rem; }
+        button:hover { transform: translateY(-1px); box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
         .btn-save { background: var(--primary); color: white; }
-        .btn-cancel { background: #64748b; color: white; text-decoration: none; padding: 10px 20px; display: inline-block; border-radius: 6px; }
-        .btn-edit { background: var(--accent); color: white; text-decoration: none; padding: 5px 10px; border-radius: 4px; font-size: 0.8rem; }
-        .btn-delete { background: #ef4444; color: white; padding: 5px 10px; font-size: 0.8rem; }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th, td { text-align: left; padding: 12px; border-bottom: 1px solid #e2e8f0; }
-        th { background: #f1f5f9; }
-        .message { padding: 10px; background: #dcfce7; color: #166534; border-radius: 6px; margin-bottom: 20px; }
-        .nav { margin-bottom: 20px; }
-        .nav a { text-decoration: none; color: var(--primary); font-weight: bold; }
+        .btn-cancel { background: #f1f5f9; color: #475569; text-decoration: none; padding: 12px 24px; display: inline-block; border-radius: 10px; font-weight: bold; }
+        .btn-edit { background: #eff6ff; color: var(--primary); text-decoration: none; padding: 6px 12px; border-radius: 6px; font-size: 0.8rem; border: 1px solid #dbeafe; }
+        .btn-delete { background: #fef2f2; color: #ef4444; padding: 6px 12px; font-size: 0.8rem; border: 1px solid #fee2e2; }
+        
+        .table-responsive { width: 100%; overflow-x: auto; border-radius: 12px; border: 1px solid #e2e8f0; margin-top: 20px; -webkit-overflow-scrolling: touch; }
+        table { width: 100%; border-collapse: collapse; min-width: 600px; }
+        th, td { text-align: left; padding: 16px; border-bottom: 1px solid #f1f5f9; }
+        th { background: #f8fafc; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; color: #64748b; font-weight: 700; }
+        tr:last-child td { border-bottom: none; }
+        tr:hover { background: #fbfcfe; }
+        
+        .message { padding: 15px; background: #dcfce7; color: #166534; border-radius: 10px; margin-bottom: 25px; border-left: 4px solid var(--secondary); font-weight: 500; }
+        .nav { margin-bottom: 30px; }
+        .nav a { text-decoration: none; color: #64748b; font-weight: 600; display: flex; align-items: center; gap: 8px; transition: color 0.2s; }
+        .nav a:hover { color: var(--primary); }
+        
+        @media (max-width: 600px) {
+            .container { padding: 20px; border-radius: 0; }
+            .btn-group-mobile { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+            button, .btn-cancel { width: 100%; text-align: center; }
+        }
     </style>
 </head>
 <body>
@@ -183,20 +198,20 @@ if (isset($_GET['edit_vocab'])) {
                     <small>Contoh: &lt;strong&gt;Word&lt;/strong&gt; (Arti)</small>
                 </div>
 
-                <div style="background: #f1f5f9; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
-                    <h4 style="margin-top: 0;">Vocabulary (Tampil di Header Card)</h4>
-                    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px;">
-                        <div class="form-group">
-                            <label>ID (e.g. Bangun Tidur)</label>
-                            <input type="text" name="vocab_id" value="<?= $edit_entry['vocab_id'] ?? '' ?>">
+                <div style="background: #f8fafc; padding: 20px; border-radius: 12px; margin-bottom: 25px; border: 1px solid #e2e8f0;">
+                    <h4 style="margin-top: 0; color: #475569; font-size: 1rem; margin-bottom: 15px;">Vocabulary (Tampil di Header Card)</h4>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label>ID (Indo)</label>
+                            <input type="text" name="vocab_id" value="<?= $edit_entry['vocab_id'] ?? '' ?>" placeholder="e.g. Bangun Tidur">
                         </div>
-                        <div class="form-group">
-                            <label>EN (e.g. Wake up)</label>
-                            <input type="text" name="vocab_en" value="<?= $edit_entry['vocab_en'] ?? '' ?>">
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label>EN (English)</label>
+                            <input type="text" name="vocab_en" value="<?= $edit_entry['vocab_en'] ?? '' ?>" placeholder="e.g. Wake up">
                         </div>
-                        <div class="form-group">
+                        <div class="form-group" style="margin-bottom: 0;">
                             <label>Cara Baca</label>
-                            <input type="text" name="vocab_pron" value="<?= $edit_entry['vocab_pron'] ?? '' ?>">
+                            <input type="text" name="vocab_pron" value="<?= $edit_entry['vocab_pron'] ?? '' ?>" placeholder="Pronunciation">
                         </div>
                     </div>
                 </div>
@@ -208,41 +223,113 @@ if (isset($_GET['edit_vocab'])) {
             </form>
 
             <h3 style="margin-top: 30px;">Existing Sentences</h3>
-            <table>
-                <thead>
-                    <tr>
-                        <th>No</th>
-                        <th>ID / EN</th>
-                        <?php if ($_SESSION['user_role'] === 'admin'): ?>
-                            <th>Creator</th>
-                        <?php endif; ?>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php foreach ($entries as $index => $row): ?>
-                    <tr>
-                        <td><?= $index + 1 ?></td>
-                        <td>
-                            <strong><?= htmlspecialchars($row['text_id']) ?></strong><br>
-                            <span style="color:#64748b"><?= htmlspecialchars($row['text_en']) ?></span>
-                        </td>
-                        <?php if ($_SESSION['user_role'] === 'admin'): ?>
-                            <td><span style="font-size: 0.8rem; color: #64748b; background: #f8fafc; padding: 2px 6px; border-radius: 4px; border: 1px solid #e2e8f0;"><?= htmlspecialchars($row['creator_name'] ?? 'System') ?></span></td>
-                        <?php endif; ?>
-                        <td>
-                            <a href="manage.php?edit_sentence=<?= $row['id'] ?>" class="btn-edit">Edit</a>
-                            <form method="POST" style="display:inline;" onsubmit="return confirm('Are you sure?')">
-                                <input type="hidden" name="action" value="delete">
-                                <input type="hidden" name="type" value="sentence">
-                                <input type="hidden" name="id" value="<?= $row['id'] ?>">
-                                <button type="submit" class="btn-delete">Delete</button>
-                            </form>
-                        </td>
-                    </tr>
-                    <?php endforeach; ?>
-                </tbody>
-            </table>
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th style="width: 50px;">No</th>
+                            <th>ID / EN</th>
+                            <?php if ($_SESSION['user_role'] === 'admin'): ?>
+                                <th>Creator</th>
+                            <?php endif; ?>
+                            <th style="width: 150px;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($entries as $index => $row): ?>
+                        <tr>
+                            <td><?= $index + 1 ?></td>
+                            <td>
+                                <strong style="color: var(--primary); display: block; margin-bottom: 4px;"><?= htmlspecialchars($row['text_id']) ?></strong>
+                                <span style="color:#64748b; font-size: 0.9rem;"><?= htmlspecialchars($row['text_en']) ?></span>
+                            </td>
+                            <?php if ($_SESSION['user_role'] === 'admin'): ?>
+                                <td><span style="font-size: 0.75rem; color: #64748b; background: #f8fafc; padding: 4px 8px; border-radius: 6px; border: 1px solid #e2e8f0; white-space: nowrap; font-weight: 500;"><?= htmlspecialchars($row['creator_name'] ?? 'System') ?></span></td>
+                            <?php endif; ?>
+                            <td>
+                                <div style="display: flex; gap: 8px;">
+                                    <a href="manage.php?edit_sentence=<?= $row['id'] ?>&user_id=<?= $manage_user_id ?>" class="btn-edit">Edit</a>
+                                    <form method="POST" style="display:inline;" onsubmit="return confirm('Are you sure?')">
+                                        <input type="hidden" name="action" value="delete">
+                                        <input type="hidden" name="type" value="sentence">
+                                        <input type="hidden" name="id" value="<?= $row['id'] ?>">
+                                        <button type="submit" class="btn-delete">Del</button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+        
+        <!-- SECTION 2: VOCABULARY LIST (GLOBAL) -->
+        <section style="margin-bottom: 50px; border: 1px solid #e2e8f0; padding: 20px; border-radius: 8px;">
+            <h2><?= $edit_vocab ? "Edit Vocabulary" : "Add General Vocabulary" ?></h2>
+            <form method="POST" action="manage.php">
+                <input type="hidden" name="action" value="save">
+                <input type="hidden" name="type" value="vocab">
+                <?php if ($edit_vocab): ?>
+                    <input type="hidden" name="id" value="<?= $edit_vocab['id'] ?>">
+                <?php endif; ?>
+
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+                    <div class="form-group">
+                        <label>Word (ID)</label>
+                        <input type="text" name="word_id" value="<?= $edit_vocab['word_id'] ?? '' ?>" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Word (EN)</label>
+                        <input type="text" name="word_en" value="<?= $edit_vocab['word_en'] ?? '' ?>" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Pronunciation</label>
+                        <input type="text" name="pronunciation" value="<?= $edit_vocab['pronunciation'] ?? '' ?>">
+                    </div>
+                </div>
+                
+                <button type="submit" class="btn-save"><?= $edit_vocab ? "Update Vocabulary" : "Save Vocabulary" ?></button>
+                <?php if ($edit_vocab): ?>
+                    <a href="manage.php" class="btn-cancel">Cancel</a>
+                <?php endif; ?>
+            </form>
+
+            <h3 style="margin-top: 30px;">Vocabulary List</h3>
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th style="width: 50px;">No</th>
+                            <th>Word (ID)</th>
+                            <th>Word (EN)</th>
+                            <th>Pronunciation</th>
+                            <th style="width: 150px;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($vocabs as $index => $row): ?>
+                        <tr>
+                            <td><?= $index + 1 ?></td>
+                            <td style="font-weight: 600; color: var(--primary);"><?= htmlspecialchars($row['word_id']) ?></td>
+                            <td><?= htmlspecialchars($row['word_en']) ?></td>
+                            <td style="color: #64748b; font-size: 0.9rem; font-style: italic;"><?= htmlspecialchars($row['pronunciation']) ?></td>
+                            <td>
+                                <div style="display: flex; gap: 8px;">
+                                    <a href="manage.php?edit_vocab=<?= $row['id'] ?>#vocab-section" class="btn-edit">Edit</a>
+                                    <form method="POST" style="display:inline;" onsubmit="return confirm('Are you sure?')">
+                                        <input type="hidden" name="action" value="delete">
+                                        <input type="hidden" name="type" value="vocab">
+                                        <input type="hidden" name="id" value="<?= $row['id'] ?>">
+                                        <button type="submit" class="btn-delete">Del</button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
         </section>
 
 
