@@ -57,9 +57,12 @@ $users = $stmt->fetchAll();
 </head>
 <body>
     <div class="container">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-            <h1>Managemen User</h1>
-            <a href="index.php" style="text-decoration: none; color: #64748b; font-weight: 600; font-size: 0.9rem;">← Kembali ke Dashboard</a>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
+            <h2 style="margin: 0; color: #2563eb;">Managemen User</h2>
+            <div style="display: flex; gap: 10px;">
+                <a href="admin_settings.php" class="btn" style="background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0;">⚙️ Pengaturan Google</a>
+                <a href="index.php" class="btn btn-manage">Kembali ke Dashboard</a>
+            </div>
         </div>
 
         <?php if ($message): ?> <div class="msg"><?= $message ?></div> <?php endif; ?>
