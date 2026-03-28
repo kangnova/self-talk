@@ -19,10 +19,22 @@ $params = [$user_id];
 // Admin viewing logic
 if ($_SESSION['user_role'] === 'admin') {
     if (isset($_GET['user_id']) && $_GET['user_id'] != $_SESSION['user_id']) {
-        // Viewing specific user (Oversight Mode)
-        $user_id = $_GET['user_id'];
-        $where_clause = "user_id = ?";
-        $params = [$user_id];
+        $target_id = $_GET['user_id'];
+        
+        // Fetch target user's role to decide mode
+        $stmt_role = $pdo->prepare("SELECT role FROM users WHERE id = ?");
+        $stmt_role->execute([$target_id]);
+        $target_role = $stmt_role->fetchColumn();
+
+        if ($target_role === 'admin') {
+            // Target is also an admin, show the shared administrative pool
+            $where_clause = "user_id IN (SELECT id FROM users WHERE role = 'admin')";
+            $params = [];
+        } else {
+            // Target is a regular user, show only their specific data (Oversight Mode)
+            $where_clause = "user_id = ?";
+            $params = [$target_id];
+        }
     } else {
         // Viewing shared admin pool (Shared Mode)
         $where_clause = "user_id IN (SELECT id FROM users WHERE role = 'admin')";
