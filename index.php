@@ -64,7 +64,6 @@ if ($is_admin && isset($_GET['user_id'])) {
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             z-index: 20;
         }
-        .sidebar.collapsed { width: 0; min-width: 0; border-right: none; }
 
         .sidebar-header {
             padding: 20px;
@@ -165,22 +164,15 @@ if ($is_admin && isset($_GET['user_id'])) {
         .page-btn[disabled] { opacity: 0.5; cursor: not-allowed; }
         .page-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
 
-        /* Sidebar Toggle - Hidden on Desktop by Default */
+        /* Sidebar Toggle Mobile & Desktop */
         .menu-toggle { display: none; border: none; background: white; width: 40px; height: 40px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); color: var(--primary); font-size: 1.2rem; cursor: pointer; transition: all 0.2s; margin-right: 15px; }
         .menu-toggle:hover { background: #f8fafc; transform: scale(1.05); }
         
-        .btn-close-sidebar { display: none; background: none; border: none; color: #94a3b8; font-size: 1.2rem; cursor: pointer; align-items: center; justify-content: center; }
-        .btn-close-sidebar:hover { color: var(--primary); }
-        
         @media (max-width: 768px) {
             .sidebar { position: fixed; left: -100%; height: 100%; z-index: 20; background: white; }
-            .sidebar.open { left: 0; box-shadow: 10px 0 30px rgba(0,0,0,0.1); }
+            .sidebar.open { left: 0; box-shadow: 10px 0 30px rgba(0,0,0,0.1); width: 280px; }
             .menu-toggle { display: block; }
             .btn-close-sidebar { display: flex; }
-            
-            /* Ensure sidebar takes space correctly when open on mobile */
-            .sidebar { width: 280px; }
-            .sidebar.collapsed { width: 0; }
         }
     </style>
 </head>
@@ -385,10 +377,7 @@ if ($is_admin && isset($_GET['user_id'])) {
 
         function toggleSidebar() {
             const sidebar = document.getElementById('sidebar');
-            sidebar.classList.toggle('collapsed');
-            if (window.innerWidth <= 768) {
-                sidebar.classList.toggle('open'); // Mobile behavior
-            }
+            sidebar.classList.toggle('open');
         }
 
         function updateProgress() {
