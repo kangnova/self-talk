@@ -1,3 +1,16 @@
+<?php
+require_once 'config.php';
+session_start();
+
+if (!isset($_SESSION['user_id'])) {
+    header('Location: login.php');
+    exit;
+}
+
+$user_name = $_SESSION['user_name'] ?: $_SESSION['user_email'];
+$is_admin = ($_SESSION['user_role'] === 'admin');
+?>
+
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -153,13 +166,21 @@
 
     <div class="main-container">
         <div class="header-section">
-            <div class="header-top">
-                <div style="display: flex; align-items: center; gap: 15px;">
-                    <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
-                    <h2>English Self-Talk</h2>
-                </div>
-                <div style="display: flex; gap: 10px;">
-                    <a href="manage.php" style="font-size: 0.85rem; color: var(--primary); text-decoration: none; font-weight: bold; border: 1.5px solid var(--primary); padding: 8px 16px; border-radius: 12px; transition: all 0.2s;">Kelola Data</a>
+            <div class="top-header">
+                <button class="menu-toggle" onclick="toggleSidebar()">☰ Menu</button>
+                
+                <div style="display: flex; align-items: center; gap: 20px;">
+                    <div class="user-info">
+                        <?php if ($is_admin): ?>
+                            <a href="admin_users.php" class="btn-admin">Managemen User</a>
+                        <?php endif; ?>
+                        <div class="btn-profile"><?= strtoupper(substr($user_name, 0, 1)) ?></div>
+                        <span class="user-name"><?= htmlspecialchars($user_name) ?></span>
+                        <a href="logout.php" class="btn-logout">Logout</a>
+                    </div>
+                    <div class="header-nav">
+                        <a href="manage.php" class="btn-manage">+ Tambah Kalimat</a>
+                    </div>
                 </div>
             </div>
             

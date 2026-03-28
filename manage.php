@@ -1,6 +1,19 @@
 <?php
 require_once 'config.php';
+session_start();
+
+if (!isset($_SESSION['user_id'])) {
+    header('Location: login.php');
+    exit;
+}
+
+$user_id = $_SESSION['user_id'];
 $pdo->exec("USE `self_talk_db` "); // Ensure using the right database
+
+$manage_user_id = $user_id;
+if ($_SESSION['user_role'] === 'admin' && isset($_GET['user_id'])) {
+    $manage_user_id = $_GET['user_id'];
+}
 
 $message = "";
 
@@ -19,18 +32,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['type']) && $_POST['ty
                 $vocab_pron = $_POST['vocab_pron'];
 
                 if ($id) {
-                    $stmt = $pdo->prepare("UPDATE talk_entries SET text_id=?, text_en=?, pronunciation=?, breakdown=?, vocab_id=?, vocab_en=?, vocab_pron=? WHERE id=?");
-                    $stmt->execute([$text_id, $text_en, $pronunciation, $breakdown, $vocab_id, $vocab_en, $vocab_pron, $id]);
+                    $stmt = $pdo->prepare("UPDATE talk_entries SET text_id=?, text_en=?, pronunciation=?, breakdown=?, vocab_id=?, vocab_en=?, vocab_pron=? WHERE id=? AND user_id=?");
+                    $stmt->execute([$text_id, $text_en, $pronunciation, $breakdown, $vocab_id, $vocab_en, $vocab_pron, $id, $manage_user_id]);
                     $message = "Sentence updated successfully!";
                 } else {
-                    $stmt = $pdo->prepare("INSERT INTO talk_entries (text_id, text_en, pronunciation, breakdown, vocab_id, vocab_en, vocab_pron) VALUES (?, ?, ?, ?, ?, ?, ?)");
-                    $stmt->execute([$text_id, $text_en, $pronunciation, $breakdown, $vocab_id, $vocab_en, $vocab_pron]);
+                    $stmt = $pdo->prepare("INSERT INTO talk_entries (user_id, text_id, text_en, pronunciation, breakdown, vocab_id, vocab_en, vocab_pron) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+                    $stmt->execute([$manage_user_id, $text_id, $text_en, $pronunciation, $breakdown, $vocab_id, $vocab_en, $vocab_pron]);
                     $message = "New sentence added successfully!";
                 }
             } elseif ($_POST['action'] === 'delete') {
                 $id = $_POST['id'];
-                $stmt = $pdo->prepare("DELETE FROM talk_entries WHERE id=?");
-                $stmt->execute([$id]);
+                $stmt = $pdo->prepare("DELETE FROM talk_entries WHERE id=? AND user_id=?");
+                $stmt->execute([$id, $manage_user_id]);
                 $message = "Sentence deleted successfully!";
             }
         } catch (PDOException $e) { $message = "Error: " . $e->getMessage(); }
