@@ -169,10 +169,18 @@ if ($is_admin && isset($_GET['user_id'])) {
         .menu-toggle:hover { background: #f8fafc; transform: scale(1.05); }
         
         @media (max-width: 768px) {
-            .sidebar { position: fixed; left: -100%; height: 100%; z-index: 20; background: white; }
+            .sidebar { position: fixed; left: -100%; height: 100%; z-index: 30; background: white; }
             .sidebar.open { left: 0; box-shadow: 10px 0 30px rgba(0,0,0,0.1); width: 280px; }
             .menu-toggle { display: block; }
             .btn-close-sidebar { display: flex; }
+            
+            .header-section { padding: 10px 15px; }
+            .top-header { flex-direction: column; align-items: stretch; gap: 10px; }
+            .user-info { display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-start; font-size: 0.8rem; }
+            .btn-profile, .user-name { display: none; } /* Hide profile icon/name on mobile header to save space */
+            .btn-manage { padding: 8px 12px; font-size: 0.75rem; }
+            .controls { flex-wrap: wrap; font-size: 0.8rem; margin-top: 10px; }
+            .content-body { padding: 0 10px 100px; margin-top: 10px; }
         }
     </style>
 </head>
@@ -329,10 +337,17 @@ if ($is_admin && isset($_GET['user_id'])) {
             // Give more time for the DOM to paint and sidebar to start closing
             setTimeout(() => {
                 const el = document.getElementById(`card-${id}`);
-                if (el) {
-                    // Using 'start' and then a small manual adjustment might be better, 
-                    // but let's try 'start' first for reliability.
-                    el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                const container = document.querySelector('.main-container');
+                const header = document.querySelector('.header-section');
+                
+                if (el && container && header) {
+                    const headerHeight = header.offsetHeight;
+                    const targetScroll = el.offsetTop - headerHeight - 15; // 15px buffer
+                    
+                    container.scrollTo({
+                        top: targetScroll,
+                        behavior: 'smooth'
+                    });
                     
                     // Visual feedback
                     el.style.borderLeftColor = 'var(--accent)';
