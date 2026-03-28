@@ -31,11 +31,11 @@ if ($action === 'get_entries') {
 }
 
 if ($action === 'get_archive') {
-    $stmt = $pdo->query("SELECT id, vocab_id, text_id, created_at FROM talk_entries ORDER BY created_at DESC");
+    $stmt = $pdo->query("SELECT id, vocab_id, text_id, created_at FROM talk_entries ORDER BY id ASC");
     $entries = $stmt->fetchAll(PDO::FETCH_ASSOC);
     
     $archive = [];
-    foreach ($entries as $entry) {
+    foreach ($entries as $index => $entry) {
         $date = strtotime($entry['created_at']);
         $year = date('Y', $date);
         $month = date('F', $date);
@@ -45,6 +45,7 @@ if ($action === 'get_archive') {
         
         $archive[$year][$month][] = [
             'id' => $entry['id'],
+            'index' => $index,
             'title' => $entry['vocab_id'] ?: mb_strimwidth($entry['text_id'], 0, 30, "...")
         ];
     }

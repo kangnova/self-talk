@@ -95,10 +95,17 @@
             margin-bottom: 20px;
             box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.05);
             border: 1px solid #f1f5f9;
-            transition: transform 0.2s;
+            border-left: 5px solid #cbd5e1;
+            transition: all 0.3s;
         }
         .card:hover { transform: translateY(-2px); }
-        .card.completed { border-right: 4px solid var(--secondary); }
+        .card.completed { border-left-color: var(--secondary); }
+        
+        @keyframes flash {
+            0% { background: #fffbeb; }
+            100% { background: white; }
+        }
+        .highlight-flash { animation: flash 2s ease-out; }
 
         .card-header { font-weight: bold; border-bottom: 1px solid #f1f5f9; padding-bottom: 12px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; }
         .card-content { font-size: 1.1rem; line-height: 1.6; min-height: 60px; }
@@ -233,7 +240,7 @@
                         </div>
                         <div class="month-items hidden">
                             ${archive[year][month].map(item => `
-                                <div class="archive-item" onclick="scrollToCard(${item.id})">${item.title}</div>
+                                <div class="archive-item" onclick="scrollToCard(${item.id}, ${item.index})">${item.title}</div>
                             `).join('')}
                         </div>
                     `;
@@ -248,10 +255,32 @@
             el.classList.toggle('active');
         }
 
-        function scrollToCard(id) {
-            // If item is not on current page, we might need a jump-to behavior.
-            // For now, let's just alert or implement basic search.
-            alert("Sent: " + id + ". Fitur lompat ke halaman otomatis akan segera hadir!");
+        async function scrollToCard(id, index) {
+            let targetPage = 1;
+            if (currentLimit !== 'all') {
+                targetPage = Math.floor(index / currentLimit) + 1;
+            }
+
+            if (currentPage !== targetPage) {
+                await fetchData(targetPage);
+            }
+
+            setTimeout(() => {
+                const el = document.getElementById(`card-${id}`);
+                if (el) {
+                    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    el.style.borderLeftColor = 'var(--accent)';
+                    el.classList.add('highlight-flash');
+                    setTimeout(() => {
+                        el.style.borderLeftColor = '';
+                        el.classList.remove('highlight-flash');
+                    }, 2000);
+                    
+                    if (window.innerWidth <= 768) {
+                        toggleSidebar();
+                    }
+                }
+            }, 100);
         }
 
         function renderPagination() {
