@@ -312,6 +312,11 @@ if ($is_admin && isset($_GET['user_id'])) {
         }
 
         async function scrollToCard(id, index) {
+            // Close sidebar immediately on mobile so user sees the content
+            if (window.innerWidth <= 768 && document.getElementById('sidebar').classList.contains('open')) {
+                toggleSidebar();
+            }
+
             let targetPage = 1;
             if (currentLimit !== 'all') {
                 targetPage = Math.floor(index / currentLimit) + 1;
@@ -321,22 +326,23 @@ if ($is_admin && isset($_GET['user_id'])) {
                 await fetchData(targetPage);
             }
 
+            // Give more time for the DOM to paint and sidebar to start closing
             setTimeout(() => {
                 const el = document.getElementById(`card-${id}`);
                 if (el) {
-                    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    // Using 'start' and then a small manual adjustment might be better, 
+                    // but let's try 'start' first for reliability.
+                    el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    
+                    // Visual feedback
                     el.style.borderLeftColor = 'var(--accent)';
                     el.classList.add('highlight-flash');
                     setTimeout(() => {
                         el.style.borderLeftColor = '';
                         el.classList.remove('highlight-flash');
                     }, 2000);
-                    
-                    if (window.innerWidth <= 768) {
-                        toggleSidebar();
-                    }
                 }
-            }, 100);
+            }, 300);
         }
 
         function renderPagination() {
