@@ -273,9 +273,16 @@ if (isset($_GET['edit_sentence'])) {
 
             try {
                 const response = await fetch(`api_ai.php?q=${encodeURIComponent(vocabId)}`);
-                const data = await response.json();
+                const text = await response.text();
+                let data;
+                try {
+                    data = JSON.parse(text);
+                } catch (e) {
+                    throw new Error("Invalid JSON response from server. Raw: " + text.substring(0, 100));
+                }
+
                 if (data.error) {
-                    console.error("AI Error:", data.error);
+                    alert("⚠️ AI Error: " + (data.details?.error?.message || data.error));
                 } else {
                     document.querySelector('input[name="vocab_en"]').value = data.vocab_en || '';
                     document.querySelector('input[name="vocab_pron"]').value = data.vocab_pron || '';
@@ -289,6 +296,7 @@ if (isset($_GET['edit_sentence'])) {
                 }
             } catch (err) { 
                 console.error("Auto-translate failed", err); 
+                alert("❌ Gagal menghubungi AI: " + err.message);
             } finally {
                 loading.style.display = "none";
                 btn.innerHTML = "✨ Auto-Fill Vocab";
@@ -318,10 +326,16 @@ if (isset($_GET['edit_sentence'])) {
 
             try {
                 const response = await fetch(`api_ai.php?q=${encodeURIComponent(vocabId)}`);
-                const data = await response.json();
+                const text = await response.text();
+                let data;
+                try {
+                    data = JSON.parse(text);
+                } catch (e) {
+                    throw new Error("Invalid JSON response from server. Raw: " + text.substring(0, 100));
+                }
 
                 if (data.error) {
-                    alert("Error AI: " + (data.details || data.error));
+                    alert("⚠️ AI Error: " + (data.details?.error?.message || data.error));
                 } else {
                     // Fill Vocab
                     document.querySelector('input[name="vocab_en"]').value = data.vocab_en || '';
@@ -336,12 +350,12 @@ if (isset($_GET['edit_sentence'])) {
                     // Flash effect
                     const form = document.querySelector('form');
                     form.style.transition = "background 0.5s";
-                    form.style.background = "#f0fdf4";
+                    form.style.background = "#f1f5f9";
                     setTimeout(() => form.style.background = "", 1000);
                 }
             } catch (err) {
                 console.error(err);
-                alert("Gagal menghubungi AI. Pastikan file api_ai.php tersedia dan internet aktif.");
+                alert("❌ Gagal menghubungi AI: " + err.message);
             } finally {
                 btn.disabled = false;
                 btn.innerHTML = originalText;
