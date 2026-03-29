@@ -18,6 +18,43 @@ if ($is_admin && isset($_GET['user_id'])) {
     $t_user = $stmt->fetch();
     $target_name = ($t_user['fullname'] ?: $t_user['email']) ?? "Unknown User";
 }
+
+// Demo entries for Guests
+$demo_entries = [];
+if (!$is_logged_in) {
+    $demo_entries = [
+        [
+            'id' => 'd1',
+            'vocab_id' => 'Bangun Tidur',
+            'vocab_en' => 'Wake up',
+            'vocab_pron' => '/weik-ap/',
+            'text_id' => 'Saya bangun tidur jam 5 pagi.',
+            'text_en' => 'I wake up at 5 in the morning.',
+            'pronunciation' => 'Ai weik-ap et faiv in dâ mor-ning',
+            'breakdown' => '<strong>Wake up</strong> (Bangun), <strong>At 5</strong> (Jam 5), <strong>In the morning</strong> (Pagi hari)'
+        ],
+        [
+            'id' => 'd2',
+            'vocab_id' => 'Sarapan',
+            'vocab_en' => 'Breakfast',
+            'vocab_pron' => '/brek-fast/',
+            'text_id' => 'Saya sedang sarapan sekarang.',
+            'text_en' => 'I am having breakfast right now.',
+            'pronunciation' => 'Ai em he-ving brek-fast rait nau',
+            'breakdown' => '<strong>Having breakfast</strong> (Sedang sarapan), <strong>Right now</strong> (Sekarang juga)'
+        ],
+        [
+            'id' => 'd3',
+            'vocab_id' => 'Berangkat Kerja',
+            'vocab_en' => 'Go to work',
+            'vocab_pron' => '/gou tu werk/',
+            'text_id' => 'Saya siap untuk berangkat kerja.',
+            'text_en' => 'I am ready to go to work.',
+            'pronunciation' => 'Ai em re-di tu gou tu werk',
+            'breakdown' => '<strong>Ready</strong> (Siap), <strong>Go to work</strong> (Berangkat kerja)'
+        ]
+    ];
+}
 ?>
 
 <!DOCTYPE html>
@@ -217,6 +254,7 @@ if ($is_admin && isset($_GET['user_id'])) {
         .guest-mode .main-container { height: auto; overflow: visible; }
         .guest-mode .content-body { max-width: 900px; padding-top: 40px; }
         .cta-section { text-align: center; padding: 60px 20px; background: #fff; border-radius: 24px; border: 1px dashed #cbd5e1; margin-top: 40px; }
+        .demo-badge { background: #fee2e2; color: #ef4444; font-size: 0.65rem; font-weight: 800; padding: 2px 8px; border-radius: 4px; text-transform: uppercase; letter-spacing: 0.5px; margin-right: 10px; }
     </style>
 </head>
 <body class="<?= !$is_logged_in ? 'guest-mode' : '' ?>">
@@ -329,7 +367,37 @@ if ($is_admin && isset($_GET['user_id'])) {
             <?php endif; ?>
 
             <span class="section-label animate-up" style="animation-delay: 0.4s;"><?= $is_logged_in ? "Latihan Anda" : "Pratinjau Materi" ?></span>
-            <div id="app" class="animate-up" style="animation-delay: 0.5s;"></div>
+            
+            <div id="preview-container" class="animate-up" style="animation-delay: 0.5s;">
+                <?php if (!$is_logged_in): ?>
+                    <?php foreach ($demo_entries as $item): ?>
+                        <div class="card" id="card-<?= $item['id'] ?>" style="border-left-color: var(--accent);">
+                            <div class="card-header">
+                                <div style="display: flex; align-items: center; width: 100%;">
+                                    <span class="demo-badge">CONTOH</span>
+                                    <span style="color: var(--primary); font-weight: bold;"><?= $item['vocab_id'] ?></span>
+                                    <span style="margin-left: 10px; font-weight: normal; font-size: 0.85rem; color: #64748b; border-left: 1px solid #e2e8f0; padding-left: 10px;">
+                                        <?= $item['vocab_en'] ?> <span style="font-style: italic; opacity:0.7;">(<?= $item['vocab_pron'] ?>)</span>
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="card-content">
+                                <div id="text-id-<?= $item['id'] ?>"><?= $item['text_id'] ?></div>
+                                <div id="text-en-<?= $item['id'] ?>" class="hidden"><strong><?= $item['text_en'] ?></strong></div>
+                                <div id="text-pron-<?= $item['id'] ?>" class="hidden"><em><?= $item['pronunciation'] ?></em></div>
+                                <div id="text-break-<?= $item['id'] ?>" class="hidden" style="font-size: 0.9rem; background:#f8fafc; padding:10px; border-radius:8px; border-left:3px solid var(--accent);"><?= $item['breakdown'] ?></div>
+                            </div>
+                            <div class="btn-group">
+                                <button class="btn-toggle" onclick="showToggle('<?= $item['id'] ?>', 'en')" id="btn-en-<?= $item['id'] ?>">English</button>
+                                <button class="btn-toggle" onclick="showToggle('<?= $item['id'] ?>', 'pron')" id="btn-pron-<?= $item['id'] ?>">Cara Baca</button>
+                                <button class="btn-toggle" onclick="showToggle('<?= $item['id'] ?>', 'break')" id="btn-break-<?= $item['id'] ?>">Pecahan</button>
+                            </div>
+                        </div>
+                    <?php endforeach; ?>
+                <?php endif; ?>
+            </div>
+
+            <div id="app"></div>
             <div id="pagination" class="pagination"></div>
 
             <?php if (!$is_logged_in): ?>
