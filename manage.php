@@ -40,7 +40,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['type']) && $_POST['ty
                 $text_id = $_POST['text_id'];
                 $text_en = $_POST['text_en'];
                 $pronunciation = $_POST['pronunciation'];
-                $breakdown = $_POST['breakdown'];
+                $breakdown = strip_tags($_POST['breakdown']);
+                // Auto-bold: find words before parentheses and wrap them in <strong>
+                // Example: "Wash (Mencuci)" -> "<strong>Wash</strong> (Mencuci)"
+                $breakdown = preg_replace('/([^,()]+)\s*(\([^)]+\))/', '<strong>$1</strong> $2', $breakdown);
                 $vocab_id = $_POST['vocab_id'];
                 $vocab_en = $_POST['vocab_en'];
                 $vocab_pron = $_POST['vocab_pron'];
@@ -66,41 +69,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['type']) && $_POST['ty
     }
 }
 
-// Handle Create / Update / Delete for Vocabulary
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['type']) && $_POST['type'] === 'vocab') {
-    if (isset($_POST['action'])) {
-        try {
-            if ($_POST['action'] === 'save') {
-                $id = $_POST['id'] ?? null;
-                $word_id = $_POST['word_id'];
-                $word_en = $_POST['word_en'];
-                $pronunciation = $_POST['pronunciation'];
 
-                if ($id) {
-                    $stmt = $pdo->prepare("UPDATE vocabulary SET word_id=?, word_en=?, pronunciation=? WHERE id=?");
-                    $stmt->execute([$word_id, $word_en, $pronunciation, $id]);
-                    $message = "Vocabulary updated successfully!";
-                } else {
-                    $stmt = $pdo->prepare("INSERT INTO vocabulary (word_id, word_en, pronunciation) VALUES (?, ?, ?)");
-                    $stmt->execute([$word_id, $word_en, $pronunciation]);
-                    $message = "New vocabulary added successfully!";
-                }
-            } elseif ($_POST['action'] === 'delete') {
-                $id = $_POST['id'];
-                $stmt = $pdo->prepare("DELETE FROM vocabulary WHERE id=?");
-                $stmt->execute([$id]);
-                $message = "Vocabulary deleted successfully!";
-            }
-        } catch (PDOException $e) { $message = "Error: " . $e->getMessage(); }
-    }
-}
 
 // Fetch filtered entries
 list($auth_where, $auth_params) = get_auth_query($is_admin_shared_mode, $manage_user_id);
 $stmt = $pdo->prepare("SELECT talk_entries.*, users.fullname as creator_name FROM talk_entries LEFT JOIN users ON talk_entries.user_id = users.id WHERE $auth_where ORDER BY id ASC");
 $stmt->execute($auth_params);
 $entries = $stmt->fetchAll();
-$vocabs = $pdo->query("SELECT * FROM vocabulary ORDER BY id ASC")->fetchAll();
+$vocabs = []; // Not used anymore
 
 // Edit mode for sentence
 $edit_entry = null;
@@ -109,12 +85,7 @@ if (isset($_GET['edit_sentence'])) {
     foreach ($entries as $e) { if ($e['id'] == $id) { $edit_entry = $e; break; } }
 }
 
-// Edit mode for vocab
-$edit_vocab = null;
-if (isset($_GET['edit_vocab'])) {
-    $id = $_GET['edit_vocab'];
-    foreach ($vocabs as $v) { if ($v['id'] == $id) { $edit_vocab = $v; break; } }
-}
+
 ?>
 
 <!DOCTYPE html>
@@ -170,101 +141,17 @@ if (isset($_GET['edit_vocab'])) {
             <div class="message"><?= $message ?></div>
         <?php endif; ?>
 
-        <!-- SECTION 1: VOCABULARY LIST (GLOBAL) -->
-        <section id="vocab-section" style="margin-bottom: 50px; border: 1px solid #e2e8f0; padding: 20px; border-radius: 8px;">
-            <h2><?= $edit_vocab ? "Edit Vocabulary" : "Add General Vocabulary" ?></h2>
-            <form method="POST" action="manage.php">
-                <input type="hidden" name="action" value="save">
-                <input type="hidden" name="type" value="vocab">
-                <?php if ($edit_vocab): ?>
-                    <input type="hidden" name="id" value="<?= $edit_vocab['id'] ?>">
-                <?php endif; ?>
 
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
-                    <div class="form-group">
-                        <label>Word (ID)</label>
-                        <input type="text" name="word_id" value="<?= $edit_vocab['word_id'] ?? '' ?>" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Word (EN)</label>
-                        <input type="text" name="word_en" value="<?= $edit_vocab['word_en'] ?? '' ?>" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Pronunciation</label>
-                        <input type="text" name="pronunciation" value="<?= $edit_vocab['pronunciation'] ?? '' ?>">
-                    </div>
-                </div>
-                
-                <button type="submit" class="btn-save"><?= $edit_vocab ? "Update Vocabulary" : "Save Vocabulary" ?></button>
-                <?php if ($edit_vocab): ?>
-                    <a href="manage.php" class="btn-cancel">Cancel</a>
-                <?php endif; ?>
-            </form>
 
-            <h3 style="margin-top: 30px;">Vocabulary List</h3>
-            <div class="table-responsive">
-                <table>
-                    <thead>
-                        <tr>
-                            <th style="width: 50px;">No</th>
-                            <th>Word (ID)</th>
-                            <th>Word (EN)</th>
-                            <th>Pronunciation</th>
-                            <th style="width: 150px;">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php foreach ($vocabs as $index => $row): ?>
-                        <tr>
-                            <td><?= $index + 1 ?></td>
-                            <td style="font-weight: 600; color: var(--primary);"><?= htmlspecialchars($row['word_id']) ?></td>
-                            <td><?= htmlspecialchars($row['word_en']) ?></td>
-                            <td style="color: #64748b; font-size: 0.9rem; font-style: italic;"><?= htmlspecialchars($row['pronunciation']) ?></td>
-                            <td>
-                                <div style="display: flex; gap: 8px;">
-                                    <a href="manage.php?edit_vocab=<?= $row['id'] ?>#vocab-section" class="btn-edit">Edit</a>
-                                    <form method="POST" style="display:inline;" onsubmit="return confirm('Are you sure?')">
-                                        <input type="hidden" name="action" value="delete">
-                                        <input type="hidden" name="type" value="vocab">
-                                        <input type="hidden" name="id" value="<?= $row['id'] ?>">
-                                        <button type="submit" class="btn-delete">Del</button>
-                                    </form>
-                                </div>
-                            </td>
-                        </tr>
-                        <?php endforeach; ?>
-                    </tbody>
-                </table>
-            </div>
-        </section>
-
-        <!-- SECTION 2: SENTENCES -->
+        <!-- SECTION: SENTENCES -->
         <section style="margin-bottom: 50px; border: 1px solid #e2e8f0; padding: 20px; border-radius: 8px;">
             <h2><?= $edit_entry ? "Edit Sentence" : "Add New Sentence" ?></h2>
-            <form method="POST" action="manage.php">
+            <form method="POST" action="">
                 <input type="hidden" name="action" value="save">
                 <input type="hidden" name="type" value="sentence">
                 <?php if ($edit_entry): ?>
                     <input type="hidden" name="id" value="<?= $edit_entry['id'] ?>">
                 <?php endif; ?>
-
-                <div class="form-group">
-                    <label>Bahasa Indonesia</label>
-                    <input type="text" name="text_id" value="<?= $edit_entry['text_id'] ?? '' ?>" required>
-                </div>
-                <div class="form-group">
-                    <label>English Sentence</label>
-                    <input type="text" name="text_en" value="<?= $edit_entry['text_en'] ?? '' ?>" required>
-                </div>
-                <div class="form-group">
-                    <label>Cara Baca (Pronunciation)</label>
-                    <input type="text" name="pronunciation" value="<?= $edit_entry['pronunciation'] ?? '' ?>">
-                </div>
-                <div class="form-group">
-                    <label>Pecahan/Breakdown (HTML allowed)</label>
-                    <textarea name="breakdown" rows="2"><?= $edit_entry['breakdown'] ?? '' ?></textarea>
-                    <small>Contoh: &lt;strong&gt;Word&lt;/strong&gt; (Arti)</small>
-                </div>
 
                 <div style="background: #f8fafc; padding: 20px; border-radius: 12px; margin-bottom: 25px; border: 1px solid #e2e8f0;">
                     <h4 style="margin-top: 0; color: #475569; font-size: 1rem; margin-bottom: 15px;">Vocabulary (Tampil di Header Card)</h4>
@@ -283,10 +170,28 @@ if (isset($_GET['edit_vocab'])) {
                         </div>
                     </div>
                 </div>
+
+                <div class="form-group">
+                    <label>Bahasa Indonesia</label>
+                    <input type="text" name="text_id" value="<?= $edit_entry['text_id'] ?? '' ?>" required>
+                </div>
+                <div class="form-group">
+                    <label>English Sentence</label>
+                    <input type="text" name="text_en" value="<?= $edit_entry['text_en'] ?? '' ?>" required>
+                </div>
+                <div class="form-group">
+                    <label>Cara Baca (Pronunciation)</label>
+                    <input type="text" name="pronunciation" value="<?= $edit_entry['pronunciation'] ?? '' ?>">
+                </div>
+                <div class="form-group">
+                    <label>Pecahan/Breakdown (Otomatis Tebalkan Kata)</label>
+                    <textarea name="breakdown" rows="2"><?= isset($edit_entry['breakdown']) ? strip_tags($edit_entry['breakdown']) : '' ?></textarea>
+                    <small>Contoh: Wash (Mencuci), Face (Muka)</small>
+                </div>
                 
                 <button type="submit" class="btn-save"><?= $edit_entry ? "Update Sentence" : "Save Sentence" ?></button>
                 <?php if ($edit_entry): ?>
-                    <a href="manage.php" class="btn-cancel">Cancel</a>
+                    <a href="manage.php?user_id=<?= $manage_user_id ?>" class="btn-cancel">Cancel</a>
                 <?php endif; ?>
             </form>
 
@@ -296,7 +201,10 @@ if (isset($_GET['edit_vocab'])) {
                     <thead>
                         <tr>
                             <th style="width: 50px;">No</th>
-                            <th>ID / EN</th>
+                            <th>Sentence (ID/EN)</th>
+                            <th>Word (ID)</th>
+                            <th>Word (EN)</th>
+                            <th>Pronunciation</th>
                             <?php if ($_SESSION['user_role'] === 'admin'): ?>
                                 <th>Creator</th>
                             <?php endif; ?>
@@ -311,6 +219,9 @@ if (isset($_GET['edit_vocab'])) {
                                 <strong style="color: var(--primary); display: block; margin-bottom: 4px;"><?= htmlspecialchars($row['text_id']) ?></strong>
                                 <span style="color:#64748b; font-size: 0.9rem;"><?= htmlspecialchars($row['text_en']) ?></span>
                             </td>
+                            <td><?= htmlspecialchars($row['vocab_id']) ?></td>
+                            <td><?= htmlspecialchars($row['vocab_en']) ?></td>
+                            <td style="color: #64748b; font-size: 0.8rem; font-style: italic;"><?= htmlspecialchars($row['vocab_pron']) ?></td>
                             <?php if ($_SESSION['user_role'] === 'admin'): ?>
                                 <td><span style="font-size: 0.75rem; color: #64748b; background: #f8fafc; padding: 4px 8px; border-radius: 6px; border: 1px solid #e2e8f0; white-space: nowrap; font-weight: 500;"><?= htmlspecialchars($row['creator_name'] ?? 'System') ?></span></td>
                             <?php endif; ?>
