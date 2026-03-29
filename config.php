@@ -36,5 +36,6 @@ try {
 }
 
 // Gemini AI API Key
-define('GEMINI_API_KEY', 'AIzaSyAvncbyoOG8qiS3iFjLx4oNi0X_F2IUox0');
+// Masukkan API Key Anda di sini secara manual di server/lokal. Jangan di-commit ke GitHub!
+define('GEMINI_API_KEY', 'YOUR_API_KEY_HERE');
 ?>
