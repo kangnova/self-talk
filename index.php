@@ -2,15 +2,10 @@
 require_once 'config.php';
 session_start();
 
-if (!isset($_SESSION['user_id'])) {
-    header('Location: login.php');
-    exit;
-}
-
-$user_name = $_SESSION['user_name'] ?: $_SESSION['user_email'];
-$is_admin = ($_SESSION['user_role'] === 'admin');
-
-$target_user_id = $_SESSION['user_id'];
+$is_logged_in = isset($_SESSION['user_id']);
+$user_name = $is_logged_in ? ($_SESSION['user_name'] ?: $_SESSION['user_email']) : "Pecinta Bahasa Inggris";
+$is_admin = $is_logged_in && ($_SESSION['user_role'] === 'admin');
+$target_user_id = $is_logged_in ? $_SESSION['user_id'] : null;
 $viewing_other = false;
 $target_name = "";
 
@@ -215,10 +210,18 @@ if ($is_admin && isset($_GET['user_id'])) {
         .btn-admin { border: 1px solid var(--primary); color: var(--primary); padding: 10px 20px; border-radius: 12px; background: white; }
         .btn-admin:hover { background: #f5f3ff; }
         .btn-logout { color: #ef4444; font-weight: 600; padding: 10px; }
+
+        /* Guest Mode Tweaks */
+        body.guest-mode { display: block; overflow-y: auto; height: auto; }
+        .guest-mode .sidebar { display: none; }
+        .guest-mode .main-container { height: auto; overflow: visible; }
+        .guest-mode .content-body { max-width: 900px; padding-top: 40px; }
+        .cta-section { text-align: center; padding: 60px 20px; background: #fff; border-radius: 24px; border: 1px dashed #cbd5e1; margin-top: 40px; }
     </style>
 </head>
-<body>
+<body class="<?= !$is_logged_in ? 'guest-mode' : '' ?>">
 
+    <?php if ($is_logged_in): ?>
     <div class="sidebar" id="sidebar">
         <div class="sidebar-header">
             <span>Arsip Self-Talk</span>
@@ -237,35 +240,44 @@ if ($is_admin && isset($_GET['user_id'])) {
             </div>
         </div>
     </div>
+    <?php endif; ?>
 
     <div class="main-container">
         <div class="header-section">
             <div class="top-header" style="display: flex; align-items: center; gap: 20px;">
                 <div style="display: flex; align-items: center;">
-                    <button class="menu-toggle" onclick="toggleSidebar()" title="Buka Sidebar">☰</button>
+                    <?php if ($is_logged_in): ?><button class="menu-toggle" onclick="toggleSidebar()" title="Buka Sidebar">☰</button><?php endif; ?>
                     <h1 style="margin: 0; font-size: 1.5rem; color: var(--primary); font-weight: 800; white-space: nowrap;">English Self-Talk</h1>
                 </div>
                 <div style="display: flex; align-items: center; gap: 20px; flex: 1; justify-content: flex-end;">
-                    <div class="user-info">
-                        <?php if ($viewing_other): ?>
-                            <div style="background: #fef3c7; padding: 6px 12px; border-radius: 8px; border: 1px solid #fbbf24; font-size: 0.85rem; color: #92400e; font-weight: 600;">
-                                Viewing Account: <strong><?= htmlspecialchars($target_name) ?></strong>
-                            </div>
-                        <?php endif; ?>
+                    <?php if ($is_logged_in): ?>
+                        <div class="user-info">
+                            <?php if ($viewing_other): ?>
+                                <div style="background: #fef3c7; padding: 6px 12px; border-radius: 8px; border: 1px solid #fbbf24; font-size: 0.85rem; color: #92400e; font-weight: 600;">
+                                    Viewing Account: <strong><?= htmlspecialchars($target_name) ?></strong>
+                                </div>
+                            <?php endif; ?>
 
-                        <?php if ($is_admin): ?>
-                            <a href="admin_users.php" class="btn-admin">Managemen User</a>
-                        <?php endif; ?>
-                        <div class="btn-profile"><?= strtoupper(substr($user_name, 0, 1)) ?></div>
-                        <span class="user-name"><?= htmlspecialchars($user_name) ?></span>
-                        <a href="logout.php" class="btn-logout">Logout</a>
-                    </div>
-                    <div class="header-nav">
-                        <a href="manage.php<?= $viewing_other ? "?user_id=$target_user_id" : "" ?>" class="btn-manage">+ Tambah Kalimat</a>
-                    </div>
+                            <?php if ($is_admin): ?>
+                                <a href="admin_users.php" class="btn-admin">Managemen User</a>
+                            <?php endif; ?>
+                            <div class="btn-profile"><?= strtoupper(substr($user_name, 0, 1)) ?></div>
+                            <span class="user-name"><?= htmlspecialchars($user_name) ?></span>
+                            <a href="logout.php" class="btn-logout">Logout</a>
+                        </div>
+                        <div class="header-nav">
+                            <a href="manage.php<?= $viewing_other ? "?user_id=$target_user_id" : "" ?>" class="btn-manage">+ Tambah Kalimat</a>
+                        </div>
+                    <?php else: ?>
+                        <div style="display: flex; gap: 10px;">
+                            <a href="login.php" class="btn-admin" style="text-decoration:none; display:flex; align-items:center;">Masuk</a>
+                            <a href="register.php" class="btn-manage" style="text-decoration:none; display:flex; align-items:center;">Daftar Gratis</a>
+                        </div>
+                    <?php endif; ?>
                 </div>
             </div>
             
+            <?php if ($is_logged_in): ?>
             <div class="controls">
                 <span>Tampilkan:</span>
                 <select id="limit-select" onchange="changeLimit(this.value)">
@@ -280,14 +292,23 @@ if ($is_admin && isset($_GET['user_id'])) {
                 </div>
                 <span class="stats" id="progress-text">0/0</span>
             </div>
+            <?php endif; ?>
         </div>
 
         <div class="content-body">
             <!-- HERO SECTION -->
             <div class="hero animate-up">
                 <div class="hero-pattern"></div>
-                <h2>Halo, <?= htmlspecialchars(explode(' ', $user_name)[0]) ?>! 👋</h2>
-                <p>Siap untuk meningkatkan kemampuan Bahasa Inggris hari ini? Gunakan metode <strong>Self-Talk</strong> untuk melatih kelancaran berbicara Anda.</p>
+                <?php if ($is_logged_in): ?>
+                    <h2>Halo, <?= htmlspecialchars(explode(' ', $user_name)[0]) ?>! 👋</h2>
+                    <p>Siap untuk meningkatkan kemampuan Bahasa Inggris hari ini? Gunakan metode <strong>Self-Talk</strong> untuk melatih kelancaran berbicara Anda.</p>
+                <?php else: ?>
+                    <h2>Belajar Bahasa Inggris Dari Kebiasaan Anda Berbicara Sendiri 🗣️</h2>
+                    <p>Ubah dialog batin Anda menjadi latihan bahasa Inggris yang efektif. Berlatih kapanpun, di manapun, gratis selamanya.</p>
+                    <div style="margin-top: 25px;">
+                        <a href="register.php" class="btn-manage" style="text-decoration:none; display:inline-block; font-size: 1rem; padding: 15px 30px;">Mulai Belajar Sekarang (Gratis)</a>
+                    </div>
+                <?php endif; ?>
             </div>
 
             <!-- LEARNING GUIDE -->
@@ -310,14 +331,26 @@ if ($is_admin && isset($_GET['user_id'])) {
                 </div>
             </div>
 
-            <span class="section-label animate-up" style="animation-delay: 0.4s;">Latihan Anda</span>
+            <span class="section-label animate-up" style="animation-delay: 0.4s;"><?= $is_logged_in ? "Latihan Anda" : "Pratinjau Materi" ?></span>
             <div id="app" class="animate-up" style="animation-delay: 0.5s;"></div>
             <div id="pagination" class="pagination"></div>
+
+            <?php if (!$is_logged_in): ?>
+            <div class="cta-section animate-up" style="animation-delay: 0.6s;">
+                <h3 style="font-size: 2rem; color: var(--primary); margin-bottom: 20px;">Sudah Siap Melangkah Lebih Jauh?</h3>
+                <p style="color: var(--text-light); margin-bottom: 30px; font-size: 1.1rem;">Daftarkan akun gratis untuk menyimpan progress latihan harian Anda sendiri.</p>
+                <div style="display: flex; gap: 15px; justify-content: center;">
+                    <a href="register.php" class="btn-manage" style="text-decoration:none; padding: 15px 40px; font-size: 1.1rem;">Daftar Akun Gratis</a>
+                    <a href="login.php" class="btn-admin" style="text-decoration:none; padding: 15px 40px; font-size: 1.1rem;">Sudah punya akun? Masuk</a>
+                </div>
+            </div>
+            <?php endif; ?>
         </div>
     </div>
 
     <script>
-        const userRole = <?= json_encode($_SESSION['user_role']) ?>;
+        const isLogged = <?= json_encode($is_logged_in) ?>;
+        const userRole = <?= json_encode($_SESSION['user_role'] ?? 'guest') ?>;
         const targetUserId = <?= json_encode($target_user_id) ?>;
         let data = [];
         let archive = {};
@@ -326,6 +359,7 @@ if ($is_admin && isset($_GET['user_id'])) {
         let totalItems = 0;
 
         async function init() {
+            if (!isLogged) return; // Only init if logged in
             await fetchArchive();
             await fetchData();
         }
