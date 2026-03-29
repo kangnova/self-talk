@@ -124,10 +124,16 @@ if (isset($_GET['edit_sentence'])) {
         .nav a:hover { color: var(--primary); }
         
         @media (max-width: 600px) {
-            .container { padding: 20px; border-radius: 0; }
+            .container { padding: 15px; border-radius: 0; }
+            .vocab-grid { grid-template-columns: 1fr !important; }
             .btn-group-mobile { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
             button, .btn-cancel { width: 100%; text-align: center; }
+            h1 { font-size: 1.5rem; }
+            .vocab-header { flex-direction: column; align-items: flex-start !important; gap: 10px; }
+            #btn-vocab-ai { width: 100%; text-align: center; }
         }
+        .vocab-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; }
+        .vocab-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
     </style>
 </head>
 <body>
@@ -145,9 +151,9 @@ if (isset($_GET['edit_sentence'])) {
 
         <!-- SECTION: SENTENCES -->
         <section style="margin-bottom: 50px; border: 1px solid #e2e8f0; padding: 20px; border-radius: 8px; position: relative;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <div class="vocab-header">
                 <h2 style="margin: 0;"><?= $edit_entry ? "Edit Sentence" : "Add New Sentence" ?></h2>
-                <button type="button" id="btn-ai-gen" onclick="generateWithAI()" style="background: linear-gradient(135deg, #6366f1, #a855f7); color: white; padding: 8px 16px; font-size: 0.8rem; display: flex; align-items: center; gap: 8px;">
+                <button type="button" id="btn-ai-gen" onclick="generateWithAI()" style="background: linear-gradient(135deg, #6366f1, #a855f7); color: white; padding: 10px 16px; font-size: 0.85rem; display: flex; align-items: center; gap: 8px; font-weight: 700;">
                     ✨ Generate with AI
                 </button>
             </div>
@@ -158,14 +164,14 @@ if (isset($_GET['edit_sentence'])) {
                     <input type="hidden" name="id" value="<?= $edit_entry['id'] ?>">
                 <?php endif; ?>
 
-                <div style="background: #f8fafc; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #e2e8f0;">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                <div style="background: #f8fafc; padding: 20px; border-radius: 12px; margin-bottom: 25px; border: 1px solid #e2e8f0;">
+                    <div class="vocab-header">
                         <h4 style="margin: 0; color: #475569;">Vocabulary (Tampil di Header Card)</h4>
-                        <button type="button" id="btn-vocab-ai" onclick="autoFillVocab()" style="background: #f1f5f9; border: 1px solid #cbd5e1; color: #64748b; font-size: 0.7rem; padding: 4px 8px; border-radius: 4px; cursor: pointer;">
+                        <button type="button" id="btn-vocab-ai" onclick="autoFillVocab()" style="background: #f1f5f9; border: 1px solid #cbd5e1; color: #64748b; font-size: 0.75rem; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-weight: 600;">
                             ✨ Auto-Fill Vocab
                         </button>
                     </div>
-                    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px;">
+                    <div class="vocab-grid">
                         <div class="form-group" style="margin-bottom: 0;">
                             <label>ID (Indo)</label>
                             <input type="text" name="vocab_id" placeholder="e.g. Bangun Tidur" value="<?= $edit_entry['vocab_id'] ?? '' ?>">
