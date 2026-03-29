@@ -33,13 +33,16 @@ if ($is_admin && isset($_GET['user_id'])) {
     <title>English Self-Talk - Rin</title>
     <style>
         :root {
-            --primary: #2563eb;
+            --primary: #4f46e5;
+            --primary-dark: #4338ca;
             --secondary: #10b981;
             --accent: #f59e0b;
             --bg: #f8fafc;
-            --text: #1e293b;
+            --text: #0f172a;
+            --text-light: #64748b;
             --card-bg: #ffffff;
-            --sidebar-w: 260px;
+            --sidebar-w: 280px;
+            --grad: linear-gradient(135deg, #4f46e5 0%, #8b5cf6 100%);
         }
 
         * { box-sizing: border-box; }
@@ -168,6 +171,25 @@ if ($is_admin && isset($_GET['user_id'])) {
         .menu-toggle { display: none; border: none; background: white; width: 40px; height: 40px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); color: var(--primary); font-size: 1.2rem; cursor: pointer; transition: all 0.2s; margin-right: 15px; }
         .menu-toggle:hover { background: #f8fafc; transform: scale(1.05); }
         
+        /* Hero & Guide Styles */
+        .hero { background: var(--grad); padding: 40px; border-radius: 20px; color: white; margin-bottom: 30px; position: relative; overflow: hidden; }
+        .hero h2 { font-size: 2rem; margin-bottom: 10px; font-weight: 800; }
+        .hero p { opacity: 0.9; font-size: 1rem; max-width: 500px; line-height: 1.6; }
+        .hero-pattern { position: absolute; right: -50px; top: -50px; width: 250px; height: 250px; background: rgba(255,255,255,0.1); border-radius: 50%; }
+
+        .guide-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 40px; }
+        .guide-card { background: white; padding: 20px; border-radius: 16px; border: 1px solid #e2e8f0; transition: all 0.3s; }
+        .guide-card:hover { transform: translateY(-5px); box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); }
+        .guide-icon { width: 40px; height: 40px; background: #f1f5f9; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; margin-bottom: 15px; color: var(--primary); }
+        .guide-card h4 { margin: 0 0 8px; font-weight: 700; color: var(--text); }
+        .guide-card p { margin: 0; font-size: 0.85rem; color: var(--text-light); line-height: 1.5; }
+
+        .card-no { font-size: 0.75rem; font-weight: 700; color: var(--primary); background: #eff6ff; padding: 4px 10px; border-radius: 20px; }
+        .section-label { font-size: 0.8rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; color: var(--text-light); margin-bottom: 20px; display: block; }
+
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-up { animation: fadeInUp 0.6s ease-out forwards; }
+
         @media (max-width: 768px) {
             .sidebar { position: fixed; left: -100%; height: 100%; z-index: 30; background: white; }
             .sidebar.open { left: 0; box-shadow: 10px 0 30px rgba(0,0,0,0.1); width: 280px; }
@@ -177,11 +199,22 @@ if ($is_admin && isset($_GET['user_id'])) {
             .header-section { padding: 10px 15px; }
             .top-header { flex-direction: column; align-items: stretch; gap: 10px; }
             .user-info { display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-start; font-size: 0.8rem; }
-            .btn-profile, .user-name { display: none; } /* Hide profile icon/name on mobile header to save space */
+            .btn-profile, .user-name { display: none; }
             .btn-manage { padding: 8px 12px; font-size: 0.75rem; }
             .controls { flex-wrap: wrap; font-size: 0.8rem; margin-top: 10px; }
-            .content-body { padding: 0 10px 100px; margin-top: 10px; }
+            .content-body { padding: 0 15px 100px; margin-top: 15px; }
+            
+            .guide-grid { grid-template-columns: 1fr; }
+            .hero { padding: 30px 20px; }
+            .hero h2 { font-size: 1.5rem; }
         }
+
+        /* Premium Buttons */
+        .btn-manage { background: var(--grad); color: white; border-radius: 12px; padding: 10px 20px; font-weight: 700; box-shadow: 0 4px 6px -1px rgba(79, 70, 229, 0.4); }
+        .btn-manage:hover { transform: scale(1.02); opacity: 0.95; }
+        .btn-admin { border: 1px solid var(--primary); color: var(--primary); padding: 10px 20px; border-radius: 12px; background: white; }
+        .btn-admin:hover { background: #f5f3ff; }
+        .btn-logout { color: #ef4444; font-weight: 600; padding: 10px; }
     </style>
 </head>
 <body>
@@ -194,6 +227,14 @@ if ($is_admin && isset($_GET['user_id'])) {
         <div class="archive-list" id="archive-list">
             <!-- Loaded via JS -->
             <p style="padding: 20px; color:#64748b; font-size: 0.8rem;">Memuat arsip...</p>
+        </div>
+        <div style="margin-top:auto; padding: 20px; border-top: 1px solid #f1f5f9;">
+            <div style="background: #f8fafc; padding: 15px; border-radius: 12px; border: 1px solid #e2e8f0;">
+                <h5 style="margin: 0 0 10px; font-size: 0.8rem; color: var(--primary);">💡 Quick Tip</h5>
+                <p style="margin: 0; font-size: 0.75rem; color: var(--text-light); line-height: 1.4;">
+                    Lakukan <strong>Self-Talk</strong> minimal 5 menit setiap hari sebelum tidur untuk hasil maksimal!
+                </p>
+            </div>
         </div>
     </div>
 
@@ -242,7 +283,35 @@ if ($is_admin && isset($_GET['user_id'])) {
         </div>
 
         <div class="content-body">
-            <div id="app"></div>
+            <!-- HERO SECTION -->
+            <div class="hero animate-up">
+                <div class="hero-pattern"></div>
+                <h2>Halo, <?= htmlspecialchars(explode(' ', $user_name)[0]) ?>! 👋</h2>
+                <p>Siap untuk meningkatkan kemampuan Bahasa Inggris hari ini? Gunakan metode <strong>Self-Talk</strong> untuk melatih kelancaran berbicara Anda.</p>
+            </div>
+
+            <!-- LEARNING GUIDE -->
+            <span class="section-label animate-up" style="animation-delay: 0.2s;">Panduan Belajar Pemula</span>
+            <div class="guide-grid animate-up" style="animation-delay: 0.3s;">
+                <div class="guide-card">
+                    <div class="guide-icon">📚</div>
+                    <h4>1. Kuasai Kosakata</h4>
+                    <p>Fokus pada satu kata kunci (Vocab) yang relevan dengan aktivitas harian Anda.</p>
+                </div>
+                <div class="guide-card">
+                    <div class="guide-icon">✍️</div>
+                    <h4>2. Bangun Kalimat</h4>
+                    <p>Buat kalimat pendek menggunakan kosakata tersebut. Jangan takut salah!</p>
+                </div>
+                <div class="guide-card">
+                    <div class="guide-icon">🗣️</div>
+                    <h4>3. Berlatih Suara</h4>
+                    <p>Baca nyaring panduan "Cara Baca". Ulangi sampai lidah Anda terasa luwes.</p>
+                </div>
+            </div>
+
+            <span class="section-label animate-up" style="animation-delay: 0.4s;">Latihan Anda</span>
+            <div id="app" class="animate-up" style="animation-delay: 0.5s;"></div>
             <div id="pagination" class="pagination"></div>
         </div>
     </div>
