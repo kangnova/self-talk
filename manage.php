@@ -144,8 +144,13 @@ if (isset($_GET['edit_sentence'])) {
 
 
         <!-- SECTION: SENTENCES -->
-        <section style="margin-bottom: 50px; border: 1px solid #e2e8f0; padding: 20px; border-radius: 8px;">
-            <h2><?= $edit_entry ? "Edit Sentence" : "Add New Sentence" ?></h2>
+        <section style="margin-bottom: 50px; border: 1px solid #e2e8f0; padding: 20px; border-radius: 8px; position: relative;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h2 style="margin: 0;"><?= $edit_entry ? "Edit Sentence" : "Add New Sentence" ?></h2>
+                <button type="button" id="btn-ai-gen" onclick="generateWithAI()" style="background: linear-gradient(135deg, #6366f1, #a855f7); color: white; padding: 8px 16px; font-size: 0.8rem; display: flex; align-items: center; gap: 8px;">
+                    ✨ Generate with AI
+                </button>
+            </div>
             <form method="POST" action="">
                 <input type="hidden" name="action" value="save">
                 <input type="hidden" name="type" value="sentence">
@@ -153,12 +158,18 @@ if (isset($_GET['edit_sentence'])) {
                     <input type="hidden" name="id" value="<?= $edit_entry['id'] ?>">
                 <?php endif; ?>
 
-                <div style="background: #f8fafc; padding: 20px; border-radius: 12px; margin-bottom: 25px; border: 1px solid #e2e8f0;">
-                    <h4 style="margin-top: 0; color: #475569; font-size: 1rem; margin-bottom: 15px;">Vocabulary (Tampil di Header Card)</h4>
-                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+                <div style="background: #f8fafc; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #e2e8f0;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                        <h4 style="margin: 0; color: #475569;">Vocabulary (Tampil di Header Card)</h4>
+                        <button type="button" id="btn-vocab-ai" onclick="autoFillVocab()" style="background: #f1f5f9; border: 1px solid #cbd5e1; color: #64748b; font-size: 0.7rem; padding: 4px 8px; border-radius: 4px; cursor: pointer;">
+                            ✨ Auto-Fill Vocab
+                        </button>
+                    </div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px;">
                         <div class="form-group" style="margin-bottom: 0;">
                             <label>ID (Indo)</label>
-                            <input type="text" name="vocab_id" value="<?= $edit_entry['vocab_id'] ?? '' ?>" placeholder="e.g. Bangun Tidur">
+                            <input type="text" name="vocab_id" placeholder="e.g. Bangun Tidur" value="<?= $edit_entry['vocab_id'] ?? '' ?>">
+                            <div id="vocab-loading" style="display:none; font-size: 0.7rem; color: var(--primary); margin-top: 4px;">⌛ Translating...</div>
                         </div>
                         <div class="form-group" style="margin-bottom: 0;">
                             <label>EN (English)</label>
@@ -245,5 +256,98 @@ if (isset($_GET['edit_sentence'])) {
 
 
     </div>
+
+    <script>
+        // Universal function to auto-fill vocab
+        async function autoFillVocab() {
+            const vocabInput = document.querySelector('input[name="vocab_id"]');
+            const vocabId = vocabInput.value;
+            if (!vocabId) return;
+
+            const loading = document.getElementById('vocab-loading');
+            const btn = document.getElementById('btn-vocab-ai');
+            
+            loading.style.display = "block";
+            btn.innerHTML = "⌛ Wait...";
+            btn.disabled = true;
+
+            try {
+                const response = await fetch(`api_ai.php?q=${encodeURIComponent(vocabId)}`);
+                const data = await response.json();
+                if (data.error) {
+                    console.error("AI Error:", data.error);
+                } else {
+                    document.querySelector('input[name="vocab_en"]').value = data.vocab_en || '';
+                    document.querySelector('input[name="vocab_pron"]').value = data.vocab_pron || '';
+                    
+                    // Small visual feedback on the fields
+                    ['vocab_en', 'vocab_pron'].forEach(name => {
+                        const el = document.querySelector(`input[name="${name}"]`);
+                        el.style.backgroundColor = "#f0fdf4";
+                        setTimeout(() => el.style.backgroundColor = "", 1000);
+                    });
+                }
+            } catch (err) { 
+                console.error("Auto-translate failed", err); 
+            } finally {
+                loading.style.display = "none";
+                btn.innerHTML = "✨ Auto-Fill Vocab";
+                btn.disabled = false;
+            }
+        }
+
+        // Trigger on blur if EN is empty
+        document.querySelector('input[name="vocab_id"]').addEventListener('blur', function() {
+            if (this.value && !document.querySelector('input[name="vocab_en"]').value) {
+                autoFillVocab();
+            }
+        });
+
+        async function generateWithAI() {
+            const vocabId = document.querySelector('input[name="vocab_id"]').value;
+            if (!vocabId) {
+                alert("Silakan isi 'ID (Indo)' pada Vocabulary terlebih dahulu sebagai kata kunci.");
+                return;
+            }
+
+            const btn = document.getElementById('btn-ai-gen');
+            const originalText = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = "⌛ Thinking...";
+            btn.style.opacity = "0.7";
+
+            try {
+                const response = await fetch(`api_ai.php?q=${encodeURIComponent(vocabId)}`);
+                const data = await response.json();
+
+                if (data.error) {
+                    alert("Error AI: " + (data.details || data.error));
+                } else {
+                    // Fill Vocab
+                    document.querySelector('input[name="vocab_en"]').value = data.vocab_en || '';
+                    document.querySelector('input[name="vocab_pron"]').value = data.vocab_pron || '';
+
+                    // Fill Sentence
+                    document.querySelector('input[name="text_id"]').value = data.text_id || '';
+                    document.querySelector('input[name="text_en"]').value = data.text_en || '';
+                    document.querySelector('input[name="pronunciation"]').value = data.pronunciation || '';
+                    document.querySelector('textarea[name="breakdown"]').value = data.breakdown || '';
+
+                    // Flash effect
+                    const form = document.querySelector('form');
+                    form.style.transition = "background 0.5s";
+                    form.style.background = "#f0fdf4";
+                    setTimeout(() => form.style.background = "", 1000);
+                }
+            } catch (err) {
+                console.error(err);
+                alert("Gagal menghubungi AI. Pastikan file api_ai.php tersedia dan internet aktif.");
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = originalText;
+                btn.style.opacity = "1";
+            }
+        }
+    </script>
 </body>
 </html>

@@ -34,4 +34,7 @@ try {
         define('GOOGLE_REDIRECT_URL', 'http://localhost/self-talk/google-callback.php');
     }
 }
+
+// Gemini AI API Key
+define('GEMINI_API_KEY', 'AIzaSyAvncbyoOG8qiS3iFjLx4oNi0X_F2IUox0');
 ?>
