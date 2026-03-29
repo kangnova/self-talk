@@ -296,40 +296,37 @@ if ($is_admin && isset($_GET['user_id'])) {
         </div>
 
         <div class="content-body">
-            <!-- HERO SECTION -->
-            <div class="hero animate-up">
-                <div class="hero-pattern"></div>
-                <?php if ($is_logged_in): ?>
-                    <h2>Halo, <?= htmlspecialchars(explode(' ', $user_name)[0]) ?>! 👋</h2>
-                    <p>Siap untuk meningkatkan kemampuan Bahasa Inggris hari ini? Gunakan metode <strong>Self-Talk</strong> untuk melatih kelancaran berbicara Anda.</p>
-                <?php else: ?>
+            <?php if (!$is_logged_in): ?>
+                <!-- HERO SECTION (Guests Only) -->
+                <div class="hero animate-up">
+                    <div class="hero-pattern"></div>
                     <h2>Belajar Bahasa Inggris Dari Kebiasaan Anda Berbicara Sendiri 🗣️</h2>
                     <p>Ubah dialog batin Anda menjadi latihan bahasa Inggris yang efektif. Berlatih kapanpun, di manapun, gratis selamanya.</p>
                     <div style="margin-top: 25px;">
                         <a href="register.php" class="btn-manage" style="text-decoration:none; display:inline-block; font-size: 1rem; padding: 15px 30px;">Mulai Belajar Sekarang (Gratis)</a>
                     </div>
-                <?php endif; ?>
-            </div>
+                </div>
 
-            <!-- LEARNING GUIDE -->
-            <span class="section-label animate-up" style="animation-delay: 0.2s;">Panduan Belajar Pemula</span>
-            <div class="guide-grid animate-up" style="animation-delay: 0.3s;">
-                <div class="guide-card">
-                    <div class="guide-icon">📚</div>
-                    <h4>1. Kuasai Kosakata</h4>
-                    <p>Fokus pada satu kata kunci (Vocab) yang relevan dengan aktivitas harian Anda.</p>
+                <!-- LEARNING GUIDE (Guests Only) -->
+                <span class="section-label animate-up" style="animation-delay: 0.2s;">Panduan Belajar Pemula</span>
+                <div class="guide-grid animate-up" style="animation-delay: 0.3s;">
+                    <div class="guide-card">
+                        <div class="guide-icon">📚</div>
+                        <h4>1. Kuasai Kosakata</h4>
+                        <p>Fokus pada satu kata kunci (Vocab) yang relevan dengan aktivitas harian Anda.</p>
+                    </div>
+                    <div class="guide-card">
+                        <div class="guide-icon">✍️</div>
+                        <h4>2. Bangun Kalimat</h4>
+                        <p>Buat kalimat pendek menggunakan kosakata tersebut. Jangan takut salah!</p>
+                    </div>
+                    <div class="guide-card">
+                        <div class="guide-icon">🗣️</div>
+                        <h4>3. Berlatih Suara</h4>
+                        <p>Baca nyaring panduan "Cara Baca". Ulangi sampai lidah Anda terasa luwes.</p>
+                    </div>
                 </div>
-                <div class="guide-card">
-                    <div class="guide-icon">✍️</div>
-                    <h4>2. Bangun Kalimat</h4>
-                    <p>Buat kalimat pendek menggunakan kosakata tersebut. Jangan takut salah!</p>
-                </div>
-                <div class="guide-card">
-                    <div class="guide-icon">🗣️</div>
-                    <h4>3. Berlatih Suara</h4>
-                    <p>Baca nyaring panduan "Cara Baca". Ulangi sampai lidah Anda terasa luwes.</p>
-                </div>
-            </div>
+            <?php endif; ?>
 
             <span class="section-label animate-up" style="animation-delay: 0.4s;"><?= $is_logged_in ? "Latihan Anda" : "Pratinjau Materi" ?></span>
             <div id="app" class="animate-up" style="animation-delay: 0.5s;"></div>
